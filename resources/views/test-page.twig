@@ -1,0 +1,183 @@
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/show-header' import show_header %}
+{% import 'components/core/forms' as forms %}
+
+{% extends 'components/core/faculty-layout' %}
+
+{% block content %}
+{{ vite('resources/js/text-editor.js')|raw }}
+{{ breadcrumb() }}
+
+<div class="flex flex-1 flex-col mx-16 gap-y-4">
+    <div class="flex max-w-full rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5">
+        <div class="flex flex-col p-4 flex-1">
+            {{ show_header('Create Coding Question') }}
+            <div class="flex gap-x-32 justify-between w-full">
+                <div class="flex flex-1/2 gap-x-4 w-full">
+                {{ forms.form_field(
+                    label:forms.label(
+                        id:'course', 
+                        content:'Course', 
+                        attributes:{
+                            'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'\*\']'}
+                            ),
+                    input:forms.select(
+                        name:'course', 
+                        values:courses, 
+                        attributes:{
+                            'class':'flex-1 cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                            'placeholder':'Select a Course',
+                            'required':true,
+                            'hx-get' :'/questions/create/courses',
+                            'hx-target': '#subjects',
+                            'hx-select': '#subjects',
+                            'hx-swap':'outerHTML',
+                            'hx-trigger':'load, change'}
+                    ),
+                )}}
+                {{ forms.form_field(
+                    label:forms.label(
+                        id:'subject', 
+                        content:'Subject', 
+                        attributes:{
+                            'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'\*\']'}
+                            ),
+                    input:forms.select(
+                        name:'subject', 
+                        values:subjects, 
+                        attributes:{
+                            'class':'flex-1 cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                            'placeholder':'Select a Subject',
+                            'required':true,
+                            'hx-get' :'/questions/create/subjects',
+                            'hx-target': '#topics',
+                            'hx-select': '#topics',
+                            'hx-swap':'outerHTML',
+                            'hx-trigger':'load, change',
+                            'id': 'subjects'}
+                    )
+                )}}
+                {{ forms.form_field(
+                    label:forms.label(
+                        id:'topic', 
+                        content:'Topic', 
+                        attributes:{
+                            'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'\*\']'}
+                            ),
+                    input:forms.select(
+                        name:'topic',
+                        attributes:{
+                            'class':'flex-1 cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                            'placeholder':'Select a Topic',
+                            'required':true,
+                            'id': 'topics'}
+                    ),
+                )}}
+                </div>
+            </div>
+        </div>  
+    </div>
+    <div class="flex flex-1 justify-between max-w-full rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5 gap-x-4">
+        <div class="flex flex-col flex-1 shrink-0 min-w-0 p-4 mb-4">   
+            <div class="flex flex-col h-16"> 
+                {{ forms.form_field(
+                    label:forms.label(
+                        id:'title', 
+                        content:'Title', 
+                        attributes:{
+                            'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900  after:text-red-500 after:content-[\'\*\']'}
+                    ),
+                    input:forms.text(
+                        name:'title', 
+                        attributes:{
+                            'class':'w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                            }
+                    )
+                )}}
+            </div>
+            <div class="flex flex-1 bg-gray-600 rounded-t-md">
+                <div class="flex flex-col flex-1">
+                    <div class="w-full bg-gray-800 rounded-t-md">
+                        <h1 class="px-4 py-2 text-gray-50 font-semibold text-lg">
+                            Instruction
+                        </h1>
+                    </div>
+                    <div class="w-full h-full">
+                        {{ forms.textarea(
+                            name:'name', 
+                            attributes:{
+                                'class':'w-full h-full bg-white px-3 py-1.5 resize-none text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-500 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                'placeholder':'Create your instructions here...',
+                            }
+                        )}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col flex-1 shrink-0 min-w-0  p-4 ">
+            <div class="flex h-16 pb-4">
+                {{ forms.form_field(
+                    label:forms.label(
+                        id:'programming_language', 
+                        content:'Programming Language', 
+                        attributes:{
+                            'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'\*\']'}
+                            ),
+                    input:forms.select(
+                        name:'programming_language', 
+                        values:programming_languages, 
+                        attributes:{
+                            'class':'flex-1 cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                            'hx-on:change':'switchLanguageFromEvent(event)'
+                        }
+                    )
+                )}}
+            </div>
+          
+            <div class="flex flex-col gap-y-2 mb-4">
+                <div class="flex flex-col rounded-md">
+                    <h1 class="bg-gray-800 p-2  text-gray-50 font-semibold rounded-t-md">Student Solution</h1>
+                    <div id="solution-div" class="flex-1 min-h-48 max-h-48 overflow-y-auto text-gray-500 border-1 border-gray-500"></div>
+                    <span class="text-xs font-semibold text-gray-800 cursor-default">*Code what will be given to student</span>
+                </div>
+                <div class="flex flex-col rounded-md">
+                    <h1 class="bg-gray-800 p-2  text-gray-50 font-semibold rounded-t-md">Sample Test</h1>
+                    <div id="test-case-div" class="flex-1 min-h-48 max-h-48 overflow-y-auto text-gray-500 border-1 border-gray-500"></div>
+                    <span class="text-xs font-semibold text-gray-800 cursor-default">*Scaffold programing languages codes for both student solution and sample test </span>
+
+                </div>
+            </div>     
+
+        </div>
+    </div>
+        <div class="flex flex-1 justify-end gap-x-2 py-2">
+        <button form="test-code" type="submit" class="cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-md"
+                hx-on:click="testCode()"
+                >
+            Test
+        </button>
+        <button type="button" class="cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-md">
+            Submit
+        </button>
+    </div>
+    <div id="data-div">
+        replace me with results
+    </div>
+    <div class="flex gap-x-2">
+        <button type="submit" class="cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm">Create Question</button>
+        <button type="submit" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-gray-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm">Create Question & create another</button>
+        <a href="/questions" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-red-500 hover:border-white hover:text-white duration-300 rounded-lg p-2 font-semibold">Cancel</a>
+
+    </div>
+</div>
+<form
+    id="test-code" 
+    class="hidden"
+    hx-post="/test/send-data" 
+    hx-include="#programming_language"
+    hx-target="#data-div"
+    >
+    {{ csrf_field() }}
+    <textarea class="hidden" name="code" id="code-input" hidden></textarea>
+</form>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% import 'components/core/forms' as forms %}
+{% from 'components/core/show-nav-item' import show_nav_item %}
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/show-header' import show_header %}
+{% from 'components/core/show-item' import show_item %}
+
+<div class="flex mx-8">
+    <button class="ml-auto p-2 text-md text-blue-900 text-sm font-medium hover:underline cursor-pointer" 
+            hx-get="/admins/load-roles" 
+            hx-trigger="click" 
+            hx-swap="innerHTML transition:true"
+            hx-target="#access-control-content">
+        Back
+    </button>
+</div>
+
+<div class="flex flex-col mx-8 gap-y-4">
+    <div class="flex flex-col max-w-full rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-950/5">
+        <div>
+            {{ show_header('Role Details') }}
+        </div>
+        <div class="flex max-w-full gap-y-4 justify-between">
+            <div class="flex flex-1 flex-col gap-y-4">
+                {{ show_item('Name', role.name|title)}}
+                {{ show_item('Date Created', role.created_at|date("m/d/Y")) }}
+            </div>
+        </div>
+    </div>  
+
+    <div class="flex flex-col max-w-full rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-950/5">
+        <div>
+            {{ show_header('Role Permissions') }}
+        </div>
+        <div class="flex gap-x-4 max-w-full bg-blue-950">
+            <div class="flex flex-1 flex-col">
+                <h1 class="text-gray-50 text-lg font-medium p-4">Current Permissions</h1>
+                <div class="p-4 max-h-48 overflow-y-auto overscroll-x-none no-scrollbar" hx-trigger="end">
+                    <div></div>
+                    {% for permission in role_permissions%}
+                        <div class="text-gray-50 text-md border-b-1 border-gray-50"> {{ permission.name }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="flex flex-1 flex-col">
+                <h1 class="text-gray-50 text-lg font-medium p-4">Available Permissions</h1>
+                <div class="p-4 max-h-48 overflow-y-auto overscroll-x-none no-scrollbar" hx-trigger="end">
+                    <div></div>
+                    {% for permission in permissions %}
+                        <div class="text-gray-50 text-md border-b-1 border-gray-50"> {{ permission.name }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>  
+    {% if can('update roles') %}
+        <div class="flex justify-end gap-x-2">
+            <button class="cursor-pointer bg-orange-600 text-gray-200 hover:bg-orange-500 hover:text-white duration-300 rounded-lg p-2 font-semibold text-sm"
+                    hx-get="/admins/roles/{{ role.id }}/edit" 
+                    hx-trigger="click" 
+                    hx-swap="innerHTML transition:true"
+                    hx-target="#access-control-content">
+                Edit
+            </button>
+        </div>
+    {% endif %}
+</div>

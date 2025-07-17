@@ -1,0 +1,33 @@
+<script>
+    htmx.onLoad(function(content) {
+        var sortables = content.querySelectorAll(".sortable");
+        for (let i = 0; i < sortables.length; i++) {
+            let sortable = sortables[i];
+            let sortableInstance = new Sortable(sortable, {
+                multiDrag: true,
+                selectedClass: 'selected', // Tailwind class
+                animation: 150,
+                group: 'shared',
+                animation: 150,
+                onSelect: function (evt) {
+                    evt.item.classList.add('border-1', 'border-white');
+                },
+                onDeselect: function (evt) {
+                    evt.item.classList.remove('border-1', 'border-white');
+                },
+            });
+
+            // Re-enable sorting on the `htmx:afterSwap` event
+            sortable.addEventListener("htmx:afterSwap", function() {
+                sortableInstance.option("disabled", false);
+            });
+        }
+    });
+    document.getElementById('create-form').addEventListener('submit', function (e) {
+                const otherSortable = document.querySelector('#permissions'); 
+                const inputs = otherSortable.querySelectorAll('input[type="hidden"]');
+                inputs.forEach(input => {
+                    input.disabled = true;
+                });
+            });
+</script>

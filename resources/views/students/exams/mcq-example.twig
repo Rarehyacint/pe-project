@@ -1,0 +1,63 @@
+{% from 'components/core/show-nav-item' import show_nav_item %}
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/show-header' import show_header %}
+{% from 'components/core/show-item' import show_item %}
+{% import 'components/core/forms' as forms %}
+{% set values = {
+    'a' : 'int[][] arr = new int[3][4];',
+    'b' : 'int[3][4] arr = new int[][];',
+    'c' : 'int arr = new int[3, 4];',
+    'd' : 'int[] arr = new int[3][4];'
+
+} %}
+
+{% extends 'components/core/student-layout' %}
+
+{% block content %}
+{{ breadcrumb() }}
+
+<div class="flex flex-1 flex-col max-w-full gap-y-4">
+    <div class="flex flex-col md:flex-row max-w-full w-full">
+        <div class="flex flex-1 w-full md:w-4/5  flex-col mx-8 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5">
+            <div class="prose max-w-full">
+                <h2>Which of the following Java code snippets is the correct way to declare and initialize a 2D array of integers with 3 rows and 4 columns?</h2>
+            </div>
+            {{ show_header('')}}
+                {{ forms.form_field(
+                    input:forms.radio(
+                        name:'multiple_choice',
+                        values: values,
+                        attributes:{    
+                            'class':'min-w-6 min-h-6 rounded-full bg-red-500 relative flex items-center justify-center',
+                            },
+                        label_attributes:{
+                            'class':'flex items-center gap-2 py-4 pl-4 pr-8 m-1 min-h-16 cursor-pointer bg-gray-50 rounded-lg border border-gray-100',
+                            }),
+                    isColumn:true)
+                }}
+
+        </div>  
+
+        <div class="flex flex-col md:w-1/5 ml-auto max-w-full gap-y-4 mr-8 max-h-fit rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5">
+            {{ show_item('Duration', '90 minutes')}}
+            {{ show_item('Question', '15/80')}}
+        </div>   
+    </div>
+    <div class="flex mx-8 gap-x-4">
+        <a href="/student/exams/exam.id" class="p-2 max-h-fit bg-orange-500 rounded-lg font-medium text-white hover:bg-orange-400 hover:text-gray-50 cursor-pointer">
+            Back
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+            <path fill-rule="evenodd" d="M11.03 3.97a.75.75 0 0 1 0 1.06l-6.22 6.22H21a.75.75 0 0 1 0 1.5H4.81l6.22 6.22a.75.75 0 1 1-1.06 1.06l-7.5-7.5a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+            </svg>
+        </a>
+        <a href="/student/exams/exam.id/torf-example" class="p-2 max-h-fit bg-orange-500 rounded-lg font-medium text-white hover:bg-orange-400 hover:text-gray-50 cursor-pointer">
+            Next
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+            <path fill-rule="evenodd" d="M12.97 3.97a.75.75 0 0 1 1.06 0l7.5 7.5a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 1 1-1.06-1.06l6.22-6.22H3a.75.75 0 0 1 0-1.5h16.19l-6.22-6.22a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+            </svg> 
+        </a>
+    </div>
+   
+</div>
+
+{% endblock %}

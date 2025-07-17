@@ -1,0 +1,23 @@
+{% from 'components/core/show-header' import show_header %}
+{% import 'components/core/forms' as forms %}
+
+<div id="question-name-form">
+    {{ forms.form_field(
+        label:forms.label(
+            id:'name', 
+            content:'Name', 
+            attributes:{
+                'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900  after:text-red-500 after:content-[\'\*\']'}
+        ),
+        input:forms.textarea(
+            name:'name', 
+            value: old('name'),
+            attributes:{
+                'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                }
+        ),
+        errors: errors.get('name'),
+        isColumn:true 
+    )}}
+</div>
+

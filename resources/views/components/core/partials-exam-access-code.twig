@@ -1,0 +1,9 @@
+{% import 'components/core/forms' as forms %}
+
+{{ forms.text(
+    name:'code', 
+    attributes:{
+        'class':'block w-full cursor-not-allowed rounded-md bg-gray-100 px-3 py-1.5 text-white outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 sm:text-sm/6',
+        'placeholder': exam.access_code,
+        'disabled':true}
+)}}

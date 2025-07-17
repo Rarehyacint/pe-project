@@ -1,0 +1,24 @@
+{% macro header_item(url, icon, label, is_faculty = true) %}
+
+{% if is_faculty %}
+    {% set is_active = url|split('/')[1] in app.request.pathInfo  %}
+{% else %}
+    {% set is_active = url|split('/')[2] in app.request.pathInfo  %}
+{% endif %}
+{% if not is_active %}
+    <a href="{{ url }}" 
+        class="flex items-center p-2 rounded-lg
+        {{ is_active ? 'text-white active bg-blue-900' : 'text-gray-200 transition-colors duration-300 transform hover:bg-gray-100 hover:text-gray-700'}}" >
+
+        {{ icon|raw }}
+        
+    </a>
+{% else %}
+    <button class="flex items-center p-2 rounded-lg
+            {{ is_active ? 'text-blue-200 active bg-blue-900' : 'text-gray-600 transition-colors duration-300 transform hover:bg-gray-100 hover:text-gray-700'}}" >
+
+    {{ icon|raw }}
+
+    </button>
+{% endif %}
+{% endmacro %}

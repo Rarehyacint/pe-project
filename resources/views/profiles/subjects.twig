@@ -1,0 +1,65 @@
+{% from 'components/core/show-nav-item' import show_nav_item %}
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/index-table' import table %}
+{% extends 'components/core/faculty-layout' %}
+
+{% set headers = ['ID', 'Course', 'Name', 'Year Level', 'Date Created'] %}
+{% set rows = [
+    ['1', 'Computer Science', 'Computer Programming 1', '1', '02-05-2025'],
+    ['2', 'Computer Science', 'Computer Programming 2', '2', '02-05-2025'],
+    ['3', 'Computer Science', 'Intro to Computing', '1', '02-05-2025'],
+    ['4', 'Computer Science', 'Algorihms', '2', '02-05-2025'],
+    ['5', 'Computer Science', 'Advanced Database System', '3', '02-05-2025'],
+
+] %}
+
+{% block content %}
+
+{{ breadcrumb() }}
+<div class="flex flex-col mx-4 pl-4">
+    <h1 class="font-bold text-4xl">Profile</h1>
+    <div class="flex flex-col pt-1 gap-y-0.5">
+        <span class="pl-2 text-xs text-gray-400 font-semi">ID</span>
+    </div>
+</div>
+
+<div class="flex flex-1 flex-col gap-y-4">
+    <div class="flex max-w-full gap-x-4 overflow-x-auto mx-auto rounded-xl bg-white p-2 shadow-sm ring-1 ring-gray-950/5 ">
+        {{ show_nav_item('/profiles/show', 
+                        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
+                            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                            <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clip-rule="evenodd" />
+                        </svg>',
+                        'View') }}
+        {{ show_nav_item('/profiles/courses', 
+                        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-5">
+                            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
+                        </svg>',
+                        'My Courses') }}
+        {{ show_nav_item('/profiles/subjects', 
+                        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" fill="currentColor" class="size-5">
+                            <path d="M80 160c0-35.3 28.7-64 64-64l32 0c35.3 0 64 28.7 64 64l0 3.6c0 21.8-11.1 42.1-29.4 53.8l-42.2 27.1c-25.2 16.2-40.4 44.1-40.4 74l0 1.4c0 17.7 14.3 32 32 32s32-14.3 32-32l0-1.4c0-8.2 4.2-15.8 11-20.2l42.2-27.1c36.6-23.6 58.8-64.1 58.8-107.7l0-3.6c0-70.7-57.3-128-128-128l-32 0C73.3 32 16 89.3 16 160c0 17.7 14.3 32 32 32s32-14.3 32-32zm80 320a40 40 0 1 0 0-80 40 40 0 1 0 0 80z"/>
+                        </svg>',
+                        'My Subjects') }}
+        {{ show_nav_item('/admin', 
+                        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" fill="currentColor" class="size-5">
+                            <path d="M80 160c0-35.3 28.7-64 64-64l32 0c35.3 0 64 28.7 64 64l0 3.6c0 21.8-11.1 42.1-29.4 53.8l-42.2 27.1c-25.2 16.2-40.4 44.1-40.4 74l0 1.4c0 17.7 14.3 32 32 32s32-14.3 32-32l0-1.4c0-8.2 4.2-15.8 11-20.2l42.2-27.1c36.6-23.6 58.8-64.1 58.8-107.7l0-3.6c0-70.7-57.3-128-128-128l-32 0C73.3 32 16 89.3 16 160c0 17.7 14.3 32 32 32s32-14.3 32-32zm80 320a40 40 0 1 0 0-80 40 40 0 1 0 0 80z"/>
+                        </svg>',
+                        'Go to Access Control') }}
+    </div>
+
+    <div class="mx-4 p-4">
+        <div class="flex justify-end items-center w-full h-16 p-8 bg-white border-x border-t border-gray-300 rounded-t-2xl">
+            <h1>Filter here</h1>
+        </div>
+        <div class="overflow-auto max-w-full scroll-smooth border-x border-t border-gray-300">
+            {{ table(headers, rows, url:'subjects') }}
+    
+        </div>
+        <div class="flex justify-end items-center w-full h-16 p-8 bg-white border-x border-b border-gray-300 rounded-b-2xl">
+            <h1>Pagination</h1>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

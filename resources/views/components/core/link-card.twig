@@ -1,0 +1,18 @@
+{% macro link(url, name, number = 0) %}
+<a href="{{ url | default('#') }}">
+    <div class="relative drop-shadow-xl flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg w-48 hover:bg-blue-900 group duration-300">     
+    
+        <div class="p-4">
+            <h5 class=" text-slate-800 text-xl font-bold group-hover:text-white">
+                {{ name }}
+            </h5>
+            
+            {% if number != 0 %}
+            <p class="text-xs text-slate-600 leading-normal group-hover:text-blue-100">
+                {{ name|split(' ')[0] }}s : {{ number }}
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</a>
+{% endmacro %}

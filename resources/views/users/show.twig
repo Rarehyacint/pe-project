@@ -1,0 +1,119 @@
+{% import 'components/core/forms' as forms %}
+{% from 'components/core/show-nav-item' import show_nav_item %}
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/show-header' import show_header %}
+{% from 'components/core/show-item' import show_item %}
+
+
+<div class="flex justify-end mx-8">
+    <button class="p-2 text-md text-blue-900 text-sm font-medium hover:underline cursor-pointer" 
+            hx-get="/admins/load-users" 
+            hx-trigger="click" 
+            hx-swap="innerHTML transition:true"
+            hx-target="#access-control-content">
+        Back
+    </button>
+</div>
+<div class="flex flex-1 flex-col mx-8 gap-y-4">
+    <div class="flex max-w-full rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5">
+        <div class="flex flex-col p-4 flex-1">
+            {{ show_header('User\'s Details') }}
+            <div class="flex gap-x-32 justify-between w-full">
+                <div class="flex p-1 w-full flex-col gap-y-4">
+                    {{ show_item('ID', user.id)}}
+                    {{ show_item('Name', user.getFullName() )}}
+                    {{ show_item('Email', user.email)}}
+                    {{ show_item('Date Created', user.created_at|date("m/d/Y")) }}
+                </div>
+                <div class="flex flex-1/4 flex-col gap-y-4">
+                    <div class="flex flex-1 flex-col gap-y-4 w-full p-4 bg-gray-100 rounded-lg">
+                        <div class="flex text-center my-2">
+                            <h3 class="mx-auto text-lg font-medium">
+                                Courses
+                            </h3>
+                        </div>
+
+                        {% for id, course in user_courses %}
+                        <div class="flex items-center hover:bg-gray-50 p-2 text-sm">
+                            <div class="mx-auto w-1/5 max-w-xs">
+                                {{ course }}
+                            </div>
+                        </div>         
+                        {% endfor %}
+                        
+                    </div>
+                </div>
+            </div>
+        </div>  
+    </div>
+
+    <div class="flex flex-col max-w-full rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-950/5">
+        <div>
+            {{ show_header('User\'s Roles and Permissions') }}
+        </div>
+        <div class="flex gap-x-4 p-4 max-w-full max-h-96">
+            <div class="flex flex-1 md:w-1/5 w-32 flex-col gap-y-4">
+                <div class="flex flex-1 flex-col gap-y-4 w-full p-4 bg-gray-100 rounded-lg">
+                    <div class="flex text-center">
+                        <h3 class="mx-auto text-lg font-medium">
+                            Roles
+                        </h3>
+                    </div>
+
+                    {% for id, role in user_roles %}
+                    <div class="flex items-center hover:bg-gray-50 p-2 text-sm">
+                        <div class="mx-auto max-w-xs font-semibold">
+                            {{ role|capitalize }}
+                        </div>
+                    </div>         
+                    {% endfor %}
+                    
+                </div>
+            </div>
+            <div class="flex flex-1 md:w-2/5 flex-col bg-blue-950/95 rounded-lg">
+                <h1 class="sticky top-0 text-gray-50 text-lg font-medium p-4">Role's Permissions</h1>
+                <div class="p-4 overflow-y-auto overscroll-x-none no-scrollbar">
+                    {% for key, permission in role_permissions %}
+                        <div class="text-gray-50 text-md border-b-1 border-gray-50">
+                            {{ permission }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="flex flex-1 md:w-2/5 flex-col bg-blue-950 rounded-lg ">
+                <h1 class="sticky top-0 text-gray-50 text-lg font-medium p-4">Custom Permissions</h1>
+                <div id="user-permissions" class="p-4 overflow-y-auto overscroll-x-none no-scrollbar" hx-trigger="end">
+                    <div></div>
+                    {% for key, permission in user_permissions %}
+                        <div class="text-gray-50 text-md border-b-1 border-gray-50">
+                            {{ permission }}
+                        </div>                        
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="flex flex-1 md:w-2/5 flex-col bg-blue-950/95 rounded-lg">
+                <h1 class="sticky top-0 text-gray-50 text-lg font-medium p-4">Permissions</h1>
+                <div id="permissions" class="p-4 overflow-y-auto overscroll-x-none no-scrollbar" hx-trigger="end">
+                    <div></div>
+                    {% for key, permission in permissions %}
+                        <div class="text-gray-50 text-md border-b-1 border-gray-50">
+                            {{ permission }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+        </div>
+    </div> 
+    {% if can('update users') %}
+        <div class="flex justify-end gap-x-2">
+            <button class="cursor-pointer bg-orange-600 text-gray-200 hover:bg-orange-500 hover:text-white duration-300 rounded-lg p-2 font-semibold text-sm"
+                    hx-get="/admins/users/{{ user.id }}/edit" 
+                    hx-trigger="click" 
+                    hx-swap="innerHTML transition:true"
+                    hx-target="#access-control-content">
+                Edit
+            </button>
+        </div>
+    {% endif %}
+</div>

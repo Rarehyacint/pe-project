@@ -1,0 +1,121 @@
+<div id="exam-content" class="flex flex-col gap-y-3 relative" >
+    <div id="spinner-container" class="absolute inset-0 flex items-center justify-center bg-white z-50 opacity-0 pointer-events-none transition-opacity duration-300 ease-in">
+        <div
+          id="spinner">
+          <img width="80" src="{{ asset('images/ring-resize.svg') }}" alt="Loading..." />
+        </div>
+    </div>
+    <div class="flex flex-col mt-4">
+        <div class="flex ml-auto mr-8 gap-x-4">
+            <button class="cursor-pointer bg-orange-500 text-gray-200 hover:bg-orange-400 hover:text-white duration-300 rounded-lg p-2 font-semibold text-xs"
+                    type="button"
+                    popovertarget="build-exam-popover">
+                    Greedy Algorithm
+            </button>
+            <button class="cursor-pointer bg-orange-500 text-gray-200 hover:bg-orange-400 hover:text-white duration-300 rounded-lg p-2 font-semibold text-xs"
+                    type="button"
+                    popovertarget="build-exam-popover">
+                    Dynamic Programming
+            </button>
+            <button class="cursor-pointer bg-orange-500 text-gray-200 hover:bg-orange-400 hover:text-white duration-300 rounded-lg p-2 font-semibold text-xs"
+                    type="button"
+                    popovertarget="build-exam-popover">
+                    Genetic Algorithm
+            </button>
+        </div>
+        <div class="flex ml-auto mr-8 mt-1">
+            <span class="text-xs font-bold text-gray-600 italic">*Use algorithm to build the exam</span>
+        </div>
+    </div>
+    <div class="flex max-w-full mx-8 rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5">
+        <div class="flex flex-col p-4 flex-1 items-center">
+            <h1 class="text-2xl font-bold text-gray-800">{{ exam.course.name }} </h1>
+            <div class="flex gap-x-4">
+                <span id="question-count-field" class="text-xs font-semibold text-gray-500">Total Questions : {{exam_questions.count()}}</span>
+                <span id="score-count-field" class="text-xs font-semibold text-gray-500">Current Score : {{exam_questions.sum('points')}}</span>    
+            </div>
+        </div>  
+    </div>
+
+
+    <div class="flex max-w-full mx-8 justify-between gap-x-8">
+        <div class="flex flex-1 max-w-full p-4 rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5">
+            <div id="subject-field" class="flex flex-col p-4 flex-1">
+                {{ show_header('Subjects') }}
+                {% for subject in exam_subjects %}
+                    {% set question_count = 0 %}
+
+                    <div class="flex justify-between m-1">
+                        <p class="text-xs text-gray-600 font-semibold">{{ subject.name }}</p>
+                        {% for topic in subject.topics %}
+                            {% if topic.id in exam_topic_ids %}
+                                {% set question_count = question_count + topic.questions|length %}
+                            {% endif %}
+                        {% endfor %}
+                        <p class="text-xs text-gray-500"> {{ question_count }}</p>
+                    </div>
+                {% endfor %}
+
+            </div>  
+        </div>
+        <div class="flex flex-1 max-w-full p-4 rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5">
+            <div id="topic-field" class="flex flex-col p-4 flex-1">
+                {{ show_header('Topics') }}
+                {% for topic in exam_topics %}
+                    <div class="flex justify-between m-1">
+                        <p class="text-xs text-gray-600 font-semibold">{{ topic.name }}</p> 
+                        <p class="text-xs text-gray-500">{{ topic.questions.count }}</p>
+                    </div>
+                {% endfor %}
+            </div>  
+        </div>
+        <div class="flex flex-1 max-w-full p-4 rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5">
+            <div id="type-field" class="flex flex-col p-4 flex-1">
+                {{ show_header('Types') }}
+                    {% for name, count in exam_question_types %}
+                        <div class="flex justify-between m-1">
+                            <p class="text-xs text-gray-600 font-semibold">{{ name|replace({'_': ' '})|title }}</p> 
+                            <p class="text-xs text-gray-500">{{ count }}</p>
+                        </div>  
+                    {% endfor %}
+            </div>  
+        </div>
+    </div>
+    <div class="mx-8">
+        <span class="text-xs font-bold text-gray-500">* Total Questions per Categories</span>  
+    </div>
+
+
+
+    <div id="exam-question-field" class="flex flex-col mx-4 p-4">
+        <div class="flex ml-auto my-2">
+            <button type="button" 
+                    class="cursor-pointer bg-blue-600 text-gray-200 hover:bg-blue-500 hover:text-white duration-300 rounded-lg p-2 font-semibold text-sm"
+                    popovertarget="add-question-popover">
+                    Add Question
+            </button>
+        </div>
+        <div class="flex justify-between items-center w-full h-16 p-8 bg-white border-x border-t border-gray-300 rounded-t-2xl">
+            <h1 class="text-2xl font-medium text-gray-800">Exam Questions </h1>
+            <h1>Filter here</h1>
+        </div>
+        <div class="overflow-auto max-w-full scroll-smooth border-x border-t border-gray-300">
+            {{ table(questions_header, exam_questions_rows, url:'exams', forAdding:true, openAction:false, exam_id:exam.id, forRemoving:true) }}
+    
+        </div>
+        <div class="flex justify-end items-center w-full h-16 p-8 bg-white border-x border-b border-gray-300 rounded-b-2xl">
+            <h1>Pagination</h1>
+        </div>
+    </div>
+
+    <div class="flex gap-x-2 mx-8 justify-end">
+        {% if exam.published != 'published' %}
+            <button type="submit" class="cursor-pointer bg-orange-600 text-gray-200 hover:bg-orange-500 hover:text-white duration-300 rounded-lg p-2 font-semibold text-sm">Publish</button>
+        {% else %}
+            <button form="none" class="cursor-pointer bg-red-600 text-gray-200 hover:bg-red-500 hover:text-white duration-300 rounded-lg p-2 font-semibold text-sm">
+                Unpublish
+            </button>
+        {% endif %}
+    </div>
+
+</div>

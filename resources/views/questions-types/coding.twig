@@ -1,0 +1,227 @@
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/show-header' import show_header %}
+{% import 'components/core/forms' as forms %}
+
+{% extends 'components/core/faculty-layout' %}
+
+{% block content %}
+{{ vite('resources/js/text-editor.js')|raw }}
+{{ breadcrumb() }}
+<form id="test-code"
+      hx-post="/test/send-data" 
+      hx-target="#data-div">
+    {{ csrf_field() }}
+    <input class="hidden" name="type" value="coding">
+    <textarea class="hidden" name="code" id="code-input"></textarea>
+    <textarea class="hidden" name="instruction" id="instruction-input"></textarea>
+
+    <div class="flex flex-1 flex-col mx-16 gap-y-4">
+        <div class="flex flex-col flex-1 p-4 max-w-full rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
+            {{ show_header('Create Coding Question') }}
+            <div class="flex flex-col gap-y-4 justify-between w-full">
+                <div class="flex flex-1 gap-x-4 w-full">
+                    {{ forms.form_field(
+                        label:forms.label(
+                            id:'course', 
+                            content:'Course', 
+                            attributes:{
+                                'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'\*\']'}
+                                ),
+                        input:forms.select(
+                            name:'course', 
+                            values:courses, 
+                            attributes:{
+                                'class':'flex-1 cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                'placeholder':'Select a Course',
+                                'required':true,
+                                'hx-get' :'/questions/create/courses',
+                                'hx-target': '#subjects',
+                                'hx-select': '#subjects',
+                                'hx-swap':'outerHTML',
+                                'hx-trigger':'load, change'}
+                        ),
+                    )}}
+                    {{ forms.form_field(
+                        label:forms.label(
+                            id:'subject', 
+                            content:'Subject', 
+                            attributes:{
+                                'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'\*\']'}
+                                ),
+                        input:forms.select(
+                            name:'subject', 
+                            values:subjects, 
+                            attributes:{
+                                'class':'flex-1 cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                'placeholder':'Select a Subject',
+                                'required':true,
+                                'hx-get' :'/questions/create/subjects',
+                                'hx-target': '#topics',
+                                'hx-select': '#topics',
+                                'hx-swap':'outerHTML',
+                                'hx-trigger':'load, change',
+                                'id': 'subjects'}
+                        )
+                    )}}
+                    {{ forms.form_field(
+                        label:forms.label(
+                            id:'topic', 
+                            content:'Topic', 
+                            attributes:{
+                                'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'\*\']'}
+                                ),
+                        input:forms.select(
+                            name:'topic',
+                            attributes:{
+                                'class':'flex-1 cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                'placeholder':'Select a Topic',
+                                'required':true,
+                                'id': 'topics'}
+                        ),
+                    )}}
+                </div>
+                <div class="flex flex-1 gap-x-4 w-full">
+                    {{ forms.form_field(
+                        label:forms.label(
+                            id:'name', 
+                            content:'Name', 
+                            attributes:{
+                                'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900  after:text-red-500 after:content-[\'\*\']'}
+                        ),
+                        input:forms.text(
+                            name:'name', 
+                            attributes:{
+                                'class':'w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                'required':true}
+                        )
+                    )}}
+                        {{ forms.form_field(
+                            label:forms.label(
+                                id:'points', 
+                                content:'Points', 
+                                attributes:{
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900'}
+                                ),
+                            input:forms.number(
+                                name:'points', 
+                                attributes:{
+                                    'class':'flex-1 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                    'required':true,
+                                    'min':0,
+                                    'max':10,
+                                    'placeholder':'1 - 10 points'})
+                        )}}
+                </div>
+                <div class="flex flex-1 rounded-t-md">
+                    <div class="flex flex-col flex-1 w-full overflow-auto ">
+                        <div class="flex w-full bg-gray-800 p-2 rounded-t-md justify-between">
+                            <h1 class="text-gray-50 p-2 font-semibold text-lg">
+                                Instruction
+                            </h1>
+                            <button form="preview-markdown-form" type="submit" id="preview-button" class="bg-gray-700 hover:bg-gray-500 hover:text-gray-100 cursor-pointer rounded-lg p-2 text-sm text-gray-100 font-semibold duration-300"
+                            hx-on:click="temporarilyDisable(this)"
+                            >
+                                Preview
+                            </button>
+                            
+                        </div>
+                            <div id="instruction-div" class="max-w-full w-full overflow-auto text-gray-500 border-1 border-gray-500 max-h-96">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="flex flex-1 justify-between max-w-full rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5 gap-x-4">
+            <div class="flex flex-col flex-1 min-w-0  p-4 ">
+                <div class="flex h-16 pb-4 justify-between">
+                    <div class="flex">
+                        {{ forms.form_field(
+                            label:forms.label(
+                                id:'programming_language', 
+                                content:'Programming Language', 
+                                attributes:{
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'\*\']'}
+                                    ),
+                            input:forms.select(
+                                name:'programming_language', 
+                                values:programming_languages, 
+                                attributes:{
+                                    'class':'flex-1 cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                    'hx-on:change':'switchLanguageFromEvent(event)',
+                                    'required':true
+                                }
+                            )
+                        )}}
+                    </div>
+                    <div class="flex">
+                        <button form="validate-complete-solution-form" type="submit" class="cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm"
+                            hx-on:click="validateLanguageCompleteSolution()">
+                        Validate Solution
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="validate-div" class="flex flex-1 p-4 bg-gray-500 my-4 rounded-lg"> validation results here</div>
+
+                <div class="flex flex-col gap-y-4 mb-4">
+                    <div class="flex flex-1 flex-col rounded-md">
+                        <div class="flex w-full bg-gray-800 p-2 justify-between rounded-t-md">
+                            <button type="button" class="bg-gray-800 text-gray-50 font-semibold p-4 rounded-md hover:bg-gray-50 hover:text-gray-900 duration-300 cursor-pointer text-sm">Complete Solution</button>
+                            <button type="button" class="bg-gray-800 text-gray-50 font-semibold p-4 rounded-md hover:bg-gray-50 hover:text-gray-900 duration-300 cursor-pointer text-sm">Initial Solution</button>
+                        </div>
+                        <div class="flex">
+                            <div id="solution-div" class="flex-1 min-h-48 max-h-48 overflow-y-auto text-gray-500 border-1 border-gray-500"></div>
+                            <div id="initial-solution-div" class="flex-1 min-h-48 max-h-48 overflow-y-auto text-gray-500 border-1 border-gray-500"></div>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-800 cursor-default">*Code what will be given to student</span>
+                    </div>
+                    <div class="flex flex-1 flex-col rounded-md">
+                        <div class="flex w-full bg-gray-800 p-2 justify-between rounded-t-md">
+                            <button type="button" class="bg-gray-800 text-gray-50 font-semibold p-4 rounded-md hover:bg-gray-50 hover:text-gray-900 duration-300 cursor-pointer text-sm">Test Case</button>
+                            <button type="button" class="bg-gray-800 text-gray-50 font-semibold p-4 rounded-md hover:bg-gray-50 hover:text-gray-900 duration-300 cursor-pointer text-sm">Test Edge Case</button>
+                        </div>         
+                        <div class="flex">
+                            <div id="test-case-div" class="flex-1 min-h-48 max-h-48 overflow-y-auto text-gray-500 border-1 border-gray-500"></div>
+                            <div id="edge-case-div" class="flex-1 min-h-48 max-h-48 overflow-y-auto text-gray-500 border-1 border-gray-500"></div>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-800 cursor-default">*Scaffold programing languages codes for both student solution and sample test </span>
+                    </div>
+                </div>     
+
+            </div>
+        </div>
+        <div class="flex gap-x-2">
+            <button form="test-code" type="submit" class="cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm "
+                    hx-on:click="getSolutionCode(), getInstructionCode()">
+                    Create Question
+            </button>
+            <a href="/questions" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-red-500 hover:border-white hover:text-white duration-300 rounded-lg p-2 font-semibold">Cancel</a>
+        </div>
+        <div id="data-div" class="w-full flex flex-1">
+            replace me with results
+        </div>
+
+    </div>
+</form>
+<form   id="preview-markdown-form"
+        class="hidden"
+        hx-post="/questions/create/preview-markdown"
+        hx-target="#preview-button"
+        hx-swap="outerHTML"
+        hx-select-oob="#instruction-div">
+    {{ csrf_field() }}
+    <textarea class="hidden" name="instruction" id="instruction-preview-input" ></textarea>
+
+</form>
+<form   id="validate-complete-solution-form"
+        class="hidden"
+        hx-post="/questions/create/validate-complete-solution"
+        hx-target="#validate-div"
+        hx-swap="outerHTML">
+    {{ csrf_field() }}
+    <textarea class="hidden" name="validate-complete-solution" id="validate-complete-solution-input" ></textarea>
+    <textarea class="hidden" name="validate-test-case" id="validate-test-case-input" ></textarea>
+    <input type="text" class="hidden" name="language-to-validate" id="language_to_validate-input">
+</form>
+{% endblock %}

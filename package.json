@@ -1,0 +1,31 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "dev": "vite --host",
+        "build": "vite build"   
+    },
+    "devDependencies": {
+        "@tailwindcss/typography": "^0.5.16",
+        "@tailwindcss/vite": "^4.1.2",
+        "axios": "^1.8.2",
+        "concurrently": "^9.0.1",
+        "laravel-vite-plugin": "^1.2.0",
+        "tailwindcss": "^4.1.2",
+        "vite": "^6.2.4"
+    },
+    "dependencies": {
+        "@codemirror/basic-setup": "^0.20.0",
+        "@codemirror/commands": "^6.8.1",
+        "@codemirror/highlight": "^0.19.8",
+        "@codemirror/lang-cpp": "^6.0.2",
+        "@codemirror/lang-java": "^6.0.1",
+        "@codemirror/lang-markdown": "^6.3.2",
+        "@codemirror/lang-php": "^6.0.1",
+        "@codemirror/lang-python": "^6.2.0",
+        "@codemirror/state": "^6.5.2",
+        "@codemirror/view": "^6.36.7",
+        "codemirror": "^6.0.1"
+    }
+}

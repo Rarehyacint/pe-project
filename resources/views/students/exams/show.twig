@@ -1,0 +1,53 @@
+{% from 'components/core/show-nav-item' import show_nav_item %}
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/show-header' import show_header %}
+{% from 'components/core/show-item' import show_item %}
+
+
+{% extends 'components/core/student-layout' %}
+
+{% block content %}
+{{ breadcrumb() }}
+
+<div class="flex flex-1 flex-col gap-y-4">
+    <div class="flex flex-col max-w-full mx-8 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5">
+            {{ show_header('Exam Name') }}  
+    </div>  
+
+    <div class="flex flex-1">
+        <div class="flex flex-col ml-8 gap-y-8">
+            <div class="prose p-4 w-full">
+                <h2>Exam Description</h2>
+                <p>This exam description ...This exam description ...This exam description ...This exam description ...This exam description ...This exam description ...This exam description ...This exam description ...This exam description ...This exam description ...This exam description ...This exam description ...</p>
+                <h2>Exam Structure</h2>
+                <ul>
+                    <li class="font-semibold">Types of Question
+                        <ul>
+                            <li>Multiple Choice </li>
+                            <li>True or False</li>
+                            <li>Identification</li>
+                            <li>Ranking</li>
+                            <li>Matching</li>
+                            <li>Coding</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div class="flex">
+                <a href="/student/exams/exam.id/mcq-example" class="p-2 max-h-fit bg-orange-500 rounded-lg font-medium text-white hover:bg-orange-400 hover:text-gray-50 cursor-pointer">Take Exam</a>
+            </div>
+        </div>
+
+        <div class="flex flex-col ml-auto max-w-full max-h-fit justify-between gap-y-4 mr-8 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5">
+            {{ show_item('Course', 'Course name')}}
+            {{ show_item('Max Score', '00')}}
+            {{ show_item('Duration', '90 minutes')}}
+            {{ show_item('Examination Date', "Examination date") }}
+            {{ show_item('Retakes', 'Unlimited')}}
+            {{ show_item('Open?', 'False')}}
+        </div>   
+    </div>
+   
+</div>
+
+{% endblock %}

@@ -1,0 +1,40 @@
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/index-table' import table %}
+{% extends 'components/core/faculty-layout' %}
+
+{% set headers = ['ID', 'Topic', 'Name', 'Path', 'Date Created'] %}
+{% set rows = [
+    ['1', 'Computer Programming 1', 'Reviewer Name', 'Path/to/reviewer/file/pdf', '02-05-2025'],
+    ['2', 'Computer Programming 2', 'Reviewer Name', 'Path/to/reviewer/file/pdf', '02-05-2025'],
+    ['3', 'Intro to Computing', 'Reviewer Name', 'Path/to/reviewer/file/pdf', '02-05-2025'],
+    ['4', 'Algorihms', 'Reviewer Name', 'Path/to/reviewer/file/pdf', '02-05-2025'],
+    ['5', 'Advanced Database System', 'Reviewer Name', 'Path/to/reviewer/file/pdf', '02-05-2025'],
+
+] %}
+
+{% block content %}
+
+{{ breadcrumb() }}
+<div class="flex justify-between items-center mx-4 pr-4">
+    <div class="flex items-center justify-start gap-x-2 mx-4">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-9">
+            <path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v14.25a.75.75 0 0 0 1 .707A8.237 8.237 0 0 1 6 18.75c1.995 0 3.823.707 5.25 1.886V4.533ZM12.75 20.636A8.214 8.214 0 0 1 18 18.75c.966 0 1.89.166 2.75.47a.75.75 0 0 0 1-.708V4.262a.75.75 0 0 0-.5-.707A9.735 9.735 0 0 0 18 3a9.707 9.707 0 0 0-5.25 1.533v16.103Z" />
+        </svg>
+        <h1 class="font-bold text-4xl">Reviewer Management</h1>
+    </div>
+    <a href="/reviewers/create" class="bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg p-2 font-semibold">Add Reviewer</a>
+</div>
+<div class="mx-4 p-4">
+    <div class="flex justify-end items-center w-full h-16 p-8 bg-white border-x border-t border-gray-300 rounded-t-2xl">
+        <h1>Filter here</h1>
+    </div>
+    <div class="overflow-auto max-w-full scroll-smooth border-x border-t border-gray-300">
+        {{ table(headers, rows, url:'reviewers') }}
+
+    </div>
+    <div class="flex justify-end items-center w-full h-16 p-8 bg-white border-x border-b border-gray-300 rounded-b-2xl">
+        <h1>Pagination</h1>
+    </div>
+</div>
+
+{% endblock %}

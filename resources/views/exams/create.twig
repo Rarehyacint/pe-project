@@ -1,0 +1,169 @@
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/show-header' import show_header %}
+{% import 'components/core/forms' as forms %}
+
+{% extends 'components/core/faculty-layout' %}
+
+{% block content %}
+{{ breadcrumb() }}
+<div class="flex flex-col mx-4 pl-4 pb-8">
+    <h1 class="font-bold text-4xl">Create Exam</h1>
+</div>
+
+<div class="flex flex-1 flex-col mx-16">
+    <form action="/exams" method="POST" class="flex flex-col gap-y-4">
+        {{ csrf_field() }}
+        <div class="flex max-w-full rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5">
+            <div class="flex flex-col p-4 flex-1">
+                {{ show_header('Details') }}
+                <div class="flex gap-x-32 justify-between w-full">
+                    <div class="flex flex-col gap-y-4 w-full">
+                        {{ forms.form_field(
+                            label:forms.label(
+                                id:'name', 
+                                content:'Name', 
+                                attributes:{
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900  after:text-red-500 after:content-[\'\*\']'}
+                            ),
+                            input:forms.text(
+                                name:'name', 
+                                attributes:{
+                                    'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                    'required':true}
+                            ),
+                            errors:errors.get('name'),
+                            isColumn:true 
+                        )}}
+                        {{ forms.form_field(
+                            label:forms.label(
+                                id:'course_id', 
+                                content:'Course', 
+                                attributes:{
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'\*\']'}
+                                    ),
+                            input:forms.select(
+                                name:'course_id', 
+                                value: 1,
+                                values: courses, 
+                                attributes:{
+                                    'class':'flex-1 cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                    'placeholder':'Select a Course',
+                                    'required':true}
+                            ),
+                            errors:errors.get('course_id'),
+                            isColumn:true 
+                        )}}
+                    </div>
+                    <div class="flex flex-1/2 flex-col gap-y-4 w-full">
+                        {{ forms.form_field(
+                            label:forms.label(
+                                id:'author', 
+                                content:'Author', 
+                                attributes:{
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900'}
+                            ),
+                            input:forms.text(
+                                name:'author', 
+                                attributes:{
+                                    'class':'block w-full cursor-not-allowed rounded-md bg-gray-100 px-3 py-1.5 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 sm:text-sm/6',
+                                    'placeholder':'Author Name is automatic/disabled',
+                                    'disabled':true}
+                            ),
+                            isColumn:true 
+                        )}}
+                        {{ forms.form_field(
+                            label:forms.label(
+                                id:'code', 
+                                content:'Access Code', 
+                                attributes:{
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900'}
+                            ),
+                            input:forms.text(
+                                name:'code', 
+                                attributes:{
+                                    'class':'block w-full cursor-not-allowed rounded-md bg-gray-100 px-3 py-1.5 text-white outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 sm:text-sm/6',
+                                    'placeholder':'Access Code is automatic/disabled',
+                                    'disabled':true}
+                            ),
+                            isColumn:true 
+                        )}}
+                    </div>
+                </div>
+            </div>  
+        </div>
+
+        <div class="flex max-w-full rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5">
+            <div class="flex flex-col p-4 flex-1">
+                {{ show_header('Settings') }}
+                <div class="flex gap-x-32 justify-between w-full">
+                    <div class="flex flex-col gap-y-4 w-full mr-96">
+                        {{ forms.form_field(
+                            label:forms.label(
+                                id:'max_score', 
+                                content:'Max Score', attributes:{
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900'}
+                                ),
+                            input:forms.number(
+                                name:'max_score', 
+                                attributes:{
+                                    'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                    'min':0
+                                }),
+                            errors:errors.get('max_score'),
+                        )}}
+                        {{ forms.form_field(
+                            label:forms.label(
+                                id:'duration', 
+                                content:'Duration (in minutes)', 
+                                attributes:{
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900'}
+                                ),
+                            input:forms.number(
+                                name:'duration', 
+                                values:values, 
+                                attributes:{
+                                    'class':'flex-1 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                    'min':0,
+                                    'placeholder':'Leave blank for unlimited duration'})
+                        )}}
+                        {{ forms.form_field(
+                            label:forms.label(
+                                id:'retakes', 
+                                content:'Retakes', 
+                                attributes:{
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900'}
+                            ),
+                            input:forms.number(
+                                name:'retakes', 
+                                attributes:{
+                                    'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                    'min':0,
+                                    'placeholder':'Leave blank for unlimited retakes'})
+                        )}}
+                        {{ forms.form_field(
+                            label:forms.label(
+                                id:'examination_date', 
+                                content:'Examination Date', 
+                                attributes:{
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900'}
+                                ),
+                            input:forms.date(
+                                name:'examination_date', 
+                                attributes:{
+                                    'class':'required:bg-red-500 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6'}
+                                )
+                        )}}
+                    </div>
+                </div>
+            </div>  
+        </div>
+
+        <div class="flex gap-x-2">
+            <button type="submit" class="cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm">Create Exam</button>
+            <button type="submit" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-gray-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm">Create Exam & create another</button>
+            <a href="/exams" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-red-500 hover:border-white hover:text-white duration-300 rounded-lg p-2 font-semibold">Cancel</a>
+
+        </div>
+    </form>
+</div>
+{% endblock %}

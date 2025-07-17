@@ -1,0 +1,11 @@
+{% extends 'components/core/base' %}
+
+{% block layout %}
+    <div class="flex flex-col w-screen overflow-auto pb-8 ">
+        {% include 'components/core/header' %}
+
+        {% block content %}
+
+        {% endblock %}
+    </div>
+{% endblock %}

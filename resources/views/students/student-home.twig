@@ -1,0 +1,40 @@
+{% from 'components/core/link-card' import link %}
+{% from 'components/core/show-header' import show_header %}
+
+{% extends 'components/core/student-layout' %}
+
+{% block content %}
+    <div class="px-4 py-2 m-4 text-4xl font-bold">
+        <h1>Home Page</h1>
+    </div>
+<div class="flex flex-col max-w-full mx-8 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5">
+    <a href="/student/exams/">{{ show_header('My Exams') }}  </a>
+    <div class="flex flex-col mt-2 gap-y-4">
+        <div class="flex gap-x-4 justify-between text-sm">
+            <a href="/student/exams/exam.id/mcq-example" class="p-2 max-h-fit bg-orange-500 rounded-lg font-medium text-white hover:bg-orange-400 hover:text-gray-50 cursor-pointer">
+                MCQ Question
+            </a>
+            <a href="/student/exams/exam.id/torf-example" class="p-2 max-h-fit bg-orange-500 rounded-lg font-medium text-white hover:bg-orange-400 hover:text-gray-50 cursor-pointer">
+                T/F Question
+            </a>
+            <a href="/student/exams/exam.id/iden-example" class="p-2 max-h-fit bg-orange-500 rounded-lg font-medium text-white hover:bg-orange-400 hover:text-gray-50 cursor-pointer">
+                Identification Question
+            </a>
+            <a href="/student/exams/exam.id/rank-example" class="p-2 max-h-fit bg-orange-500 rounded-lg font-medium text-white hover:bg-orange-400 hover:text-gray-50 cursor-pointer">
+                Ranking Question
+            </a>
+            <a href="/student/exams/exam.id/match-example" class="p-2 max-h-fit bg-orange-500 rounded-lg font-medium text-white hover:bg-orange-400 hover:text-gray-50 cursor-pointer">
+                Matching Question
+            </a>
+            <a href="/student/exams/exam.id/coding-example" class="p-2 max-h-fit bg-orange-500 rounded-lg font-medium text-white hover:bg-orange-400 hover:text-gray-50 cursor-pointer">
+                Coding Question
+            </a>
+        </div>
+
+        <a href="/student/exams/exam.id/result" class="p-2 max-w-fit bg-blue-500 rounded-lg font-medium text-white hover:bg-blue-400 hover:text-gray-50 cursor-pointer">
+            Exam Result
+        </a>
+    </div>
+</div>
+
+{% endblock %}

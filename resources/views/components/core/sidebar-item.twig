@@ -1,0 +1,26 @@
+{% macro sidebar_item(url, icon, label, is_faculty = true) %}
+
+{% if is_faculty %}
+    {% set is_active = url|split('/')[1] in app.request.pathInfo  %}
+{% else %}
+    {% set is_active = url|split('/')[2] in app.request.pathInfo  %}
+{% endif %}
+{% if not is_active %}
+    <a href="{{ url }}" 
+        class="flex items-center px-4 py-4 mt-1 rounded-lg
+        {{ is_active ? 'text-white active bg-blue-900' : 'text-gray-600 transition-colors duration-300 transform hover:bg-gray-100 hover:text-gray-700'}}" >
+
+        {{ icon|raw }}
+        
+        <span class="mx-4 font-medium">{{ label }}</span>
+    </a>
+{% else %}
+    <button class="flex items-center px-4 py-4 mt-1 rounded-lg
+            {{ is_active ? 'text-white active bg-blue-900' : 'text-gray-600 transition-colors duration-300 transform hover:bg-gray-100 hover:text-gray-700'}}" >
+
+    {{ icon|raw }}
+
+    <span class="mx-4 font-medium">{{ label }}</span>
+    </button>
+{% endif %}
+{% endmacro %}

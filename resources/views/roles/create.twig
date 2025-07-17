@@ -1,0 +1,84 @@
+{% import 'components/core/forms' as forms %}
+{% from 'components/core/show-nav-item' import show_nav_item %}
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/show-header' import show_header %}
+{% from 'components/core/show-item' import show_item %}
+
+<div class="flex mx-8">
+    <button class="ml-auto p-2 text-md text-blue-900 text-sm font-medium hover:underline cursor-pointer" 
+            hx-get="/admins/load-roles" 
+            hx-trigger="click" 
+            hx-swap="innerHTML transition:true"
+            hx-target="#access-control-content">
+        Back
+    </button>
+</div>
+<div class="flex flex-1 flex-col mx-8">
+    <form method="POST" id="create-form" hx-post="/admins/roles" hx-target="#access-control-content" class="flex flex-col gap-y-4" >
+        {{ csrf_field() }}
+        <div class="flex max-w-full rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5 mx-64">
+            <div class="flex flex-col p-4 flex-1">
+                {{ show_header('Details') }}
+                <div class="flex gap-x-32 justify-between w-full">
+                    <div class="flex flex-col gap-y-4 w-full">
+                        {{ forms.form_field(
+                            label:forms.label(
+                                id:'name', 
+                                content:'Name', 
+                                attributes:{
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900  after:text-red-500 after:content-[\'\*\']'}
+                            ),
+                            input:forms.text(
+                                name:'name', 
+                                value: old('name'),
+                                attributes:{
+                                    'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                    'required':true}
+                            ),
+                            isColumn:true ,
+                            errors: errors.get('name'),
+                        )}}
+                    </div>
+                </div>
+            </div>  
+        </div>
+
+        <div class="flex flex-col max-w-full rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-950/5">
+            <div>
+                {{ show_header('Give Role Permissions') }}
+            </div>
+            <div class="flex gap-x-4 p-4 max-w-full max-h-96">
+                <div class="flex flex-1 flex-col bg-blue-950 rounded-lg ">
+                    <h1 class="sticky top-0 text-gray-50 text-lg font-medium p-4">Role's Permissions</h1>
+                    <div id="role-permissions" class="sortable p-4  overflow-y-auto overscroll-x-none no-scrollbar" hx-trigger="end">
+                        <div></div>
+                        {% for key, permission in role_permissions %}
+                            <div class="text-gray-50 text-md border-b-1 border-gray-50">
+                                <input type='hidden' name='permissions[]' value={{ key }}>{{ permission }}
+                            </div>                        
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="flex flex-1 flex-col bg-blue-950/95 rounded-lg">
+                    <h1 class="sticky top-0 text-gray-50 text-lg font-medium p-4">Permissions</h1>
+                    <div id="permissions" class="sortable p-4 overflow-y-auto overscroll-x-none no-scrollbar" hx-trigger="end">
+                        <div></div>
+                        {% for key, permission in permissions %}
+                            <div class="text-gray-50 text-md border-b-1 border-gray-50">
+                                <input type='hidden' name='permissions[]' value={{ key }}>{{ permission }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>  
+
+        <div class="flex gap-x-2">
+            <button type="submit" class="cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm">Create Role</button>
+            <button type="button" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-gray-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm">Create Role & create another</button>
+            <a href="{{ request.META.HTTP_REFERER }}" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-red-500 hover:border-white hover:text-white duration-300 rounded-lg p-2 font-semibold">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% include 'components/core/sort-table' %}

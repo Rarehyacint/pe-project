@@ -1,0 +1,45 @@
+<div id="tab-buttons" class="flex flex-col">
+    <div class="flex">
+        <button id="tab-info-button" class="text-lg rounded-t-lg bg-gray-50 p-4 font-bold text-gray-800 cursor-pointer"
+        hx-get="/exams/builder/tabs" hx-target="#tab-info" 
+        hx-swap="innerHTML" hx-select="#tab-exam-info">
+        What is Exam builder? 
+        </button>
+        <button id="tab-greedy-button" class="text-lg p-4 font-bold text-gray-800 cursor-pointer"
+        hx-get="/exams/builder/tabs" hx-target="#tab-info" 
+        hx-swap="innerHTML" hx-select="#tab-greedy-content">
+            Greedy Algorithm 
+        </button>
+        <button id="tab-dynamic-button" class="text-lg p-4 font-bold text-gray-800 cursor-pointer"
+        hx-get="/exams/builder/tabs" hx-target="#tab-info" 
+        hx-swap="innerHTML" hx-select="#tab-dynamic">
+            Dynamic Programming 
+        </button>
+        <button id="tab-genetic-button" class="text-lg p-4 font-bold text-gray-800 cursor-pointer"
+        hx-get="/exams/builder/tabs" hx-target="#tab-info" 
+        hx-swap="innerHTML" hx-select="#tab-genetic">
+            Genetics Algorithm 
+        </button>
+    </div>
+    <div id="tab-info" class="h-64 p-4 overflow-auto bg-gray-50 w-full rounded-b-lg">
+        Exam Information Here
+    </div>
+</div>
+
+<button id="tab-greedy-button" class="text-lg p-4 font-bold text-gray-800 cursor-pointer"
+hx-get="/exams/builder/tabs" hx-target="#tab-info" 
+hx-swap="innerHTML" hx-select="#tab-greedy-content">
+    Greedy Algorithm 
+</button>
+<button id="tab-dynamic-button" class="text-lg p-4 font-bold text-gray-800 cursor-pointer"
+hx-get="/exams/builder/tabs" hx-target="#tab-info" 
+hx-swap="innerHTML" hx-select="#tab-dynamic">
+    Dynamic Programming 
+</button>
+<button id="tab-genetic-button" class="text-lg p-4 font-bold text-gray-800 cursor-pointer"
+hx-get="/exams/builder/tabs" hx-target="#tab-info" 
+hx-swap="innerHTML" hx-select="#tab-genetic">
+    Genetics Algorithm 
+</button>
+
+<div id="tab-exam-info"> hello</div>

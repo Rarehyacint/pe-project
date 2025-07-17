@@ -1,0 +1,112 @@
+<div id="tab-info" class="flex flex-col">
+    <div class="flex">
+        <button class="text-lg rounded-t-lg bg-gray-100 p-4 font-bold text-gray-800">
+            What is Exam Builder? 
+        </button>
+        <button class="text-lg p-4 font-bold text-gray-800 cursor-pointer"
+        hx-get="/exams/builder/tabs" hx-target="#tab-content" 
+        hx-swap="innerHTML" hx-select="#tab-greedy">
+            Greedy Algorithm 
+        </button>
+        <button class="text-lg p-4 font-bold text-gray-800 cursor-pointer"
+        hx-get="/exams/builder/tabs" hx-target="#tab-content" 
+        hx-swap="innerHTML" hx-select="#tab-dynamic">
+            Dynamic Programming 
+        </button>
+    </div>
+    <div class="flex flex-col h-64 p-6 overflow-auto bg-gray-100 w-full shadow-lg gap-y-4 text-sm font-semibold">
+        <p class="text-gray-700 italic">The Exam Builder is a tool that helps scaffold an exam using an algorithm to insert a set of questions.</p>
+        
+        <div class="text-gray-800">
+            <p class="text-lg">📝How does it work?</p>
+            <p class="pt-2">The Exam is treated as a <span class="font-bold text-blue-900">0/1 Knapsack Problem</span> to determine the best set of questions with optimal coverage for the course's topics and subjects. The following are the metrics of the problem:</p>
+        </div>
+
+        <div class="bg-gray-200 p-4 rounded-lg">
+            <ul class=" text-gray-800">
+                <li><span class=" text-blue-900">Items</span> = Questions</li>
+                <li><span class=" text-blue-900">Value of Item</span> = Question's Coverage Score</li>
+                <li><span class=" text-blue-900">Weight of Item</span> = Question's Point</li>
+                <li><span class=" text-blue-900">Criteria for picking an Item</span> = Density of the item (value/weight) or Value of the Item</li>
+            </ul>
+        </div>
+
+         <div class="flex flex-col gap-y-1">
+            <p class="text-lg text-gray-700">The Equation for the Question's Coverage Score:</p>
+            <div class="bg-gray-200 p-4 rounded-lg">
+                <p class="font-mono text-gray-800 text-sm px-1 rounded">Coverage Score = subject_weight * subject_coverage_score + topic_weight * topic_coverage_score</p>
+                <div class="mt-2 text-xs pl-2">
+                    <p>Wherein:</p>
+                    <p>subject_coverage_score = <span class="font-bold">1 / Total Questions in Subject</span></p>
+                    <p>topic_coverage_score = <span class="font-bold">1 / Total Questions in Topic</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+
+<div id="tab-greedy" class="flex flex-col">
+    <div class="flex">
+        <button class="text-lg p-4 font-bold text-gray-800 cursor-pointer"
+        hx-get="/exams/builder/tabs" hx-target="#tab-content" 
+        hx-swap="innerHTML" hx-select="#tab-info">
+        What is Exam Builder? 
+        </button>
+        <button class="text-lg rounded-t-lg bg-gray-100 p-4 font-bold text-gray-800">
+            Greedy Algorithm 
+        </button>
+        <button class="text-lg p-4 font-bold text-gray-800 cursor-pointer"
+        hx-get="/exams/builder/tabs" hx-target="#tab-content" 
+        hx-swap="innerHTML" hx-select="#tab-dynamic">
+            Dynamic Programming 
+        </button>
+    </div>
+    <div class="flex flex-col h-64 p-6 overflow-auto bg-gray-100 w-full shadow-lg gap-y-4 text-sm font-semibold">
+        <div class="text-gray-800">
+            <p class="text-lg">📝How does it work?</p>
+            <p class="pt-2">A greedy algorithm is a problem-solving strategy that makes the locally optimal choice at each step, hoping this leads to a globally optimal solution.</p>
+            <p>It's generally used in optimization problems where you're trying to maximize or minimize some quantity</p>
+        </div>
+
+        <div class="bg-gray-200 p-4 rounded-lg">
+            <ol class="list-decimal list-inside text-gray-800">
+                <li><span class=" text-blue-900">Greedy Metric</span> = Criteria picked</li>
+                <li><span class=" text-blue-900">How does it makes optimal choice?</span> = By sorting the question lists based on the greedy metric to give the next best available item</li>
+                <li><span class=" text-blue-900">Always take the next item until total weight is reached</span></li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<div id="tab-dynamic" class="flex flex-col">
+    <div class="flex">
+        <button class="text-lg p-4 font-bold text-gray-800 cursor-pointer"
+        hx-get="/exams/builder/tabs" hx-target="#tab-content" 
+        hx-swap="innerHTML" hx-select="#tab-info">
+        What is Exam Builder? 
+        </button>
+        <button class="text-lg p-4 font-bold text-gray-800 cursor-pointer"
+        hx-get="/exams/builder/tabs" hx-target="#tab-content" 
+        hx-swap="innerHTML" hx-select="#tab-greedy">
+            Greedy Algorithm 
+        </button>
+        <button class="text-lg rounded-t-lg bg-gray-100 p-4 font-bold text-gray-800">
+            Dynamic Programming 
+        </button>
+    </div>
+    <div class="flex flex-col h-64 p-6 overflow-auto bg-gray-100 w-full shadow-lg gap-y-4 text-sm font-semibold">
+        <div class="text-gray-800">
+            <p class="text-lg">📝How does it work?</p>
+            <p class="pt-2">Dynamic Programming is a problem-solving strategy that solves complex problems by breaking them down into smaller overlapping subproblems, solving each subproblem only once, and storing (or "memoizing") the results for future use.</p>
+        </div>
+
+        <div class="bg-gray-200 p-4 rounded-lg">
+            <ol class="list-decimal list-inside text-gray-800">
+                <li><span class=" text-blue-900">Application in Exam Builder</span> = A bottom-up style of dynamic programming dp[row][column] is used</li>
+                <li><span class=" text-blue-900">Overlapping Subproblems</span> = Computation of whether to include or exclude questions to exam</li>
+                <li><span class=" text-blue-900">Optimal Substructure</span> = Finding the best/highest value for item in dp[row][column]</li>
+            </ol>
+        </div>
+    </div>
+</div>

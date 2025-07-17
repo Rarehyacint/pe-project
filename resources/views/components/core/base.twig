@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/plugins/SortableMultiDrag/SortableMultiDrag.min.js"></script>
+
+    {{ vite('resources/css/app.css')|raw }}
+    {{ vite('resources/js/text-editor.js')|raw }}
+
+    <title>Thesis Project</title>
+
+</head>
+<body class="flex bg-[#fbfbfe]">
+    {% block layout %}
+
+    {% endblock %}
+</body>
+</html>

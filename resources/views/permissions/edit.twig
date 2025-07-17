@@ -1,0 +1,80 @@
+{% import 'components/core/forms' as forms %}
+{% from 'components/core/show-nav-item' import show_nav_item %}
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/show-header' import show_header %}
+{% from 'components/core/show-item' import show_item %}
+
+
+<div class="flex mx-8">
+    <button class="ml-auto p-2 text-md text-blue-900 text-sm font-medium hover:underline cursor-pointer" 
+            hx-get="/admins/load-permissions" 
+            hx-trigger="click" 
+            hx-swap="innerHTML transition:true"
+            hx-target="#access-control-content">
+        Back
+    </button>
+</div>
+<div class="flex flex-1 flex-col mx-8">
+    <form method="POST" id="create-form" hx-post="/admins/permissions/{{ permission.id }}" hx-target="#access-control-content" class="flex flex-col gap-y-4" >
+        {{ csrf_field() }}
+        {{ method_field('PATCH') }}
+        <div class="flex max-w-full rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5">
+            <div class="flex flex-col p-4 flex-1">
+                <div class="flex flex-col gap-y-4 w-full">
+                    {{ forms.form_field(
+                        label:forms.label(
+                            id:'name', 
+                            content:'Name', 
+                            attributes:{
+                                'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900  after:text-red-500 after:content-[\'\*\']'}
+                        ),
+                        input:forms.text(
+                            name:'name', 
+                            value: permission.name,
+                            attributes:{
+                                'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                'required':true}
+                        ),
+                        isColumn:true 
+                    )}}
+                </div>
+            </div>  
+        </div>
+
+        <div class="flex gap-x-2 justify-end">
+            <button type="submit" class="cursor-pointer bg-orange-600 text-gray-200 hover:bg-orange-500 hover:text-white duration-300 rounded-lg p-2 font-semibold text-sm">Update</button>
+            <button form="none" class="cursor-pointer bg-red-600 text-gray-200 hover:bg-red-500 hover:text-white duration-300 rounded-lg p-2 font-semibold text-sm"
+                    popovertarget="delete-popover">
+                        Delete
+            </button>
+            <a href="{{ request.META.HTTP_REFERER }}" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-red-500 hover:border-white hover:text-white duration-300 rounded-lg p-2 font-semibold">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<div popover="manual" class="backdrop:bg-gray-900/15 backdrop:backdrop-blur-[1px] transition-discrete duration-300 m-auto p-16 ease-in-out transition-opacity rounded-xl" id="delete-popover">
+    <div class="flex flex-col gap-y-4">
+        {{ show_header('Delete Permission') }}
+        <div class="flex flex-1 flex-col">
+            <div class="flex flex-col gap-y-4">
+                <div class="flex gap-x-32 justify-between w-full">
+                    <h1>Are you sure to delete this Permission?</h1>
+                </div>
+                <div class="flex gap-x-2">
+                    <button form="delete-form" type="submit" class="mx-auto px-32 cursor-pointer bg-red-600 text-gray-200 hover:bg-red-500 hover:text-white duration-300 rounded-lg py-2 font-semibold text-sm">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button popovertarget="delete-popover" popovertargetaction="hide" class="absolute cursor-pointer right-0 top-0 pt-4 pr-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>          
+    </button>
+  </div>
+
+<form method="POST" hx-post="/admins/permissions/{{ permission.id }}" class="hidden" id="delete-form" hx-target="#access-control-content">
+    {{ csrf_field() }}
+    {{ method_field('DELETE') }}
+</form>

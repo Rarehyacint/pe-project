@@ -1,0 +1,145 @@
+{% from 'components/core/show-nav-item' import show_nav_item %}
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/show-header' import show_header %}
+{% from 'components/core/show-item' import show_item %}
+{% import 'components/core/forms' as forms %}
+{% set values = {
+    'a' : 'int[][] arr = new int[3][4];',
+    'b' : 'int[3][4] arr = new int[][];',
+    'c' : 'int arr = new int[3, 4];',
+    'd' : 'int[] arr = new int[3][4];'
+
+} %}
+
+{% extends 'components/core/student-layout' %}
+
+{% block content %}
+{{ breadcrumb() }}
+
+<div class="flex flex-1 flex-col max-w-full gap-y-4">
+    <div class="flex flex-col md:flex-row max-w-full w-full">
+        <div class="flex flex-1 w-full md:w-4/5  flex-col mx-8 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5">
+            <div class="prose max-w-full">
+                <h2>Exam Result</h2>
+            </div>
+            {{ show_header('')}}
+        <div class="flex flex-1 flex-col prose max-w-none gap-y-4">
+            <div class="bg-gray-100 px-4 rounded-2xl text-gray-800">            
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Total Marks</th>
+                        <th>Marks Obtained</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Programming Basics</td>
+                            <td>20</td>
+                            <td>18</td>
+                        </tr>
+                        <tr>
+                            <td>Data Structures</td>
+                            <td>20</td>
+                            <td>16</td>
+                        </tr>
+                        <tr>
+                            <td>Algorithms</td>
+                            <td>20</td>
+                            <td>15</td>
+                        </tr>
+                        <tr>
+                            <td>Computer Architecture</td>
+                            <td>20</td>
+                            <td>10</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="bg-gray-100 px-4 rounded-2xl text-gray-800">            
+                <table>
+        <thead>
+        <tr>
+        <th>Q#</th>
+        <th>Question Summary</th>
+        <th>Your Answer</th>
+        <th>Correct Answer</th>
+        <th>Score</th>
+        <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td>1</td>
+        <td>What is a variable in Python?</td>
+        <td>A container for a value</td>
+        <td>A container for a value</td>
+        <td>2/2</td>
+        <td>✅</td>
+        </tr>
+        <tr>
+        <td>2</td>
+        <td>Identify the correct loop structure</td>
+        <td>Used <code>while</code> instead of <code>for</code></td>
+        <td><code>for</code> loop with range</td>
+        <td>1/2</td>
+        <td>❌</td>
+        </tr>
+        <tr>
+        <td>3</td>
+        <td>Which data structure uses LIFO?</td>
+        <td>Stack</td>
+        <td>Stack</td>
+        <td>2/2</td>
+        <td>✅</td>
+        </tr>
+        <tr>
+        <td>4</td>
+        <td>Time complexity of binary search?</td>
+        <td>O(n)</td>
+        <td>O(log n)</td>
+        <td>0/2</td>
+        <td>❌</td>
+        </tr>
+        <tr>
+        <td>5</td>
+        <td>Draw CPU block diagram (text-based answer)</td>
+        <td>Partial components listed</td>
+        <td>All components required</td>
+        <td>1/2</td>
+        <td>⚠️ Partial</td>
+        </tr>
+        <tr>
+        <td>…</td>
+        <td>…</td>
+        <td>…</td>
+        <td>…</td>
+        <td>…</td>
+        <td>…</td>
+        </tr>
+        <tr>
+        <td>25</td>
+        <td>Rank this process in ascending order</td>
+        <td>1. Code Writing</td>
+        <td>Well-explained with code</td>
+        <td>4/4</td>
+        <td>✅</td>
+        </tr>
+        </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        </div>  
+
+        <div class="flex flex-col md:w-1/5 ml-auto max-w-full gap-y-4 mr-8 max-h-fit rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5">
+            {{ show_item('Exam Name', 'Exam name')}}
+            {{ show_item('Course', 'Course name')}}
+            {{ show_item('Max Score', '00')}}
+        </div>   
+    </div>
+</div>
+
+{% endblock %}

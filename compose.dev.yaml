@@ -1,0 +1,151 @@
+services:
+  web:
+    image: nginx:latest # Using the default Nginx image with custom configuration.
+    volumes:
+      # Mount the application code for live updates
+      - ./app:/var/www/app
+      - ./bootstrap:/var/www/bootstrap
+      - ./routes:/var/www/routes
+      - ./config:/var/www/config
+      - ./resources:/var/www/resources
+      - ./public:/var/www/public
+      - ./database:/var/www/database
+      - ./compose.dev.yaml:/var/www/compose.dev.yaml
+      - ./compose.prod.yaml:/var/www/compose.prod.yaml
+      - ./docker:/var/www/docker
+      - ./composer.json:/var/www/composer.json
+      - ./composer.lock:/var/www/composer.lock
+      - ./package-lock.json:/var/www/package-lock.json
+      - ./package.json:/var/www/package.json
+      - ./vite.config.js:/var/www/vite.config.js
+      - ./.env.example:/var/www/.env.example
+      - ./.dockerignore:/var/www/.dockerignore
+      - ./.editorconfig:/var/www/.editorconfig
+      - ./artisan:/var/www/artisan
+      - ./vendor:/var/www/vendor
+      - app-node-modules:/var/www/node_modules
+      - app-storage:/var/www/storage
+
+      # Mount the Nginx configuration file
+      - ./docker/development/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      # Map port 80 inside the container to the port specified by 'NGINX_PORT' on the host machine
+      - "80:80"
+    environment:
+      - NGINX_HOST=localhost
+    networks:
+      - laravel-development
+    depends_on:
+      php-fpm:
+        condition: service_started  # Wait for php-fpm to start
+
+  php-fpm:
+    # For the php-fpm service, we will create a custom image to install the necessary PHP extensions and setup proper permissions.
+    build:
+      context: .
+      dockerfile: ./docker/common/php-fpm/Dockerfile
+      target: development
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    env_file:
+      # Load the environment variables from the Laravel application
+      - .env
+    user: "root"
+    volumes:
+      # Mount the application code for live updates
+      - ./app:/var/www/app
+      - ./bootstrap:/var/www/bootstrap
+      - ./routes:/var/www/routes
+      - ./config:/var/www/config
+      - ./resources:/var/www/resources
+      - ./public:/var/www/public
+      - ./database:/var/www/database
+      - ./compose.dev.yaml:/var/www/compose.dev.yaml
+      - ./compose.prod.yaml:/var/www/compose.prod.yaml
+      - ./docker:/var/www/docker
+      - ./composer.json:/var/www/composer.json
+      - ./composer.lock:/var/www/composer.lock
+      - ./package-lock.json:/var/www/package-lock.json
+      - ./package.json:/var/www/package.json
+      - ./vite.config.js:/var/www/vite.config.js
+      - ./.env.example:/var/www/.env.example
+      - ./.dockerignore:/var/www/.dockerignore
+      - ./.editorconfig:/var/www/.editorconfig
+      - ./artisan:/var/www/artisan
+      - ./vendor:/var/www/vendor
+      - app-node-modules:/var/www/node_modules
+      - app-storage:/var/www/storage
+
+    networks:
+      - laravel-development
+    depends_on:
+      postgres:
+        condition: service_started  # Wait for postgres to start
+
+  workspace:
+   # For the workspace service, we will also create a custom image to install and setup all the necessary stuff.
+    build:
+      context: .
+      dockerfile: ./docker/development/workspace/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    ports:
+      - '${VITE_PORT:-5173}:5173'
+    tty: true  # Enables an interactive terminal
+    stdin_open: true  # Keeps standard input open for 'docker exec'
+    env_file:
+      - .env
+    volumes:
+      - ./app:/var/www/app
+      - ./bootstrap:/var/www/bootstrap
+      - ./routes:/var/www/routes
+      - ./config:/var/www/config
+      - ./resources:/var/www/resources
+      - ./public:/var/www/public
+      - ./database:/var/www/database
+      - ./compose.dev.yaml:/var/www/compose.dev.yaml
+      - ./compose.prod.yaml:/var/www/compose.prod.yaml
+      - ./docker:/var/www/docker
+      - ./composer.json:/var/www/composer.json
+      - ./composer.lock:/var/www/composer.lock
+      - ./package-lock.json:/var/www/package-lock.json
+      - ./package.json:/var/www/package.json
+      - ./vite.config.js:/var/www/vite.config.js
+      - ./.env.example:/var/www/.env.example
+      - ./.dockerignore:/var/www/.dockerignore
+      - ./.editorconfig:/var/www/.editorconfig
+      - ./artisan:/var/www/artisan
+      - ./vendor:/var/www/vendor
+      - app-node-modules:/var/www/node_modules
+      - app-storage:/var/www/storage
+    networks:
+      - laravel-development 
+      
+
+  postgres:
+    image: postgres:16
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres-data-development:/var/lib/postgresql/data
+    networks:
+      - laravel-development
+
+  redis:
+    image: redis:alpine
+    networks:
+      - laravel-development
+
+networks:
+  laravel-development:
+
+volumes:
+  postgres-data-development:
+  app-node-modules:
+  app-storage:

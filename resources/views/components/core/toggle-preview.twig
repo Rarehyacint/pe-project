@@ -1,0 +1,17 @@
+<div id="instruction-div"></div>
+<button form="preview-markdown-form" type="submit" id="preview-button" class="bg-gray-700 hover:bg-gray-600 hover:text-gray-50 cursor-pointer rounded-2xl p-2 text-xs text-gray-100 font-semibold"
+hx-on:click="temporarilyDisable(this)">
+    Preview
+</button>
+
+<form id="preview-markdown-form"
+class="hidden"
+hx-post="/questions/create/preview-markdown"
+hx-target="#preview-button"
+hx-swap="outerHTML"
+hx-select-oob="#instruction-div"
+>
+{{ csrf_field() }}
+<textarea class="hidden" name="instruction" id="instruction-preview-input" ></textarea>
+
+</form>

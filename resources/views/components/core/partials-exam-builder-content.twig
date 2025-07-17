@@ -1,0 +1,5 @@
+<div id="exam-content" class="flex flex-col gap-y-3" hx-indicator="#spinner">
+    {% for question in questions_with_values|sort %}
+        <p>{{ question.id }} {{ question.name }} : ratio={{ question.score_ratio }} point={{ question.points }}</p>
+    {% endfor %}
+</div>

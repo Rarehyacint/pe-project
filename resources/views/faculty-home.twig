@@ -1,0 +1,34 @@
+{% from 'components/core/link-card' import link %}
+
+{% extends 'components/core/faculty-layout' %}
+
+{% block content %}
+<div class="m-4 pt-4 flex gap-5 justify-center" >
+    {{ link(url:'/exams', name:'Exam Bank', number:exam) }}
+    {{ link(url:'/questions',name:'Question Bank', number:course.counts.questions) }}
+    {{ link(url:'/topics',name:'Topic Bank', number:course.counts.topics) }}
+    {{ link(url:'/subjects',name:'Subject Bank', number:course.counts.subjects) }}
+    {{ link(url:'/reviewers',name:'Reviewer Bank', number:10) }}
+
+</div>
+
+<div class="m-4">
+    <div class="px-4 py-2 text-2xl font-bold">
+        <h1>Exams</h1>
+    </div>
+   
+    <div class="flex gap-5 justify-center">
+        {% include 'components/core/exam-card' %}
+        {% include 'components/core/exam-card' %}
+        {% include 'components/core/exam-card' %}
+    </div>
+    
+</div>
+
+<div class="m-4">
+    <div class="px-4 py-2 text-2xl font-bold">
+        <h1>Reports</h1>
+    </div>
+
+</div>
+{% endblock %}

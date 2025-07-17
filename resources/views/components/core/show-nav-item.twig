@@ -1,0 +1,21 @@
+{% macro show_nav_item(url, icon, label, attributes) %}
+    {% set is_active = url == app.request.pathInfo %}
+    {% if is_active %}
+    <button href="{{ url }}" 
+    {% for attr, value in attributes %} {{ attr }}="{{ value }}"{% endfor %}
+    class="flex gap-x-1 items-center p-2 bg-gray-100 rounded-lg text-blue-900
+    {{ is_active ? 'bg-gray-100 active text-blue-900' : 'text-gray-600 transition-colors duration-300 transform hover:bg-gray-100 hover:text-gray-700'}}">     
+    {{ icon|raw }}
+
+    {{ label }}
+    </button>
+    {% else %}
+    <a href="{{ url }}" 
+    {% for attr, value in attributes %} {{ attr }}="{{ value }}"{% endfor %}
+        class="flex gap-x-1 items-center p-2 rounded-lg text-gray-600 transition-colors duration-300 transform hover:bg-gray-100 hover:text-gray-700">     
+        {{ icon|raw }}
+
+        {{ label }}
+    </a>
+    {% endif %}
+{% endmacro %}

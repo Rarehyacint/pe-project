@@ -1,0 +1,128 @@
+{% from 'components/core/show-nav-item' import show_nav_item %}
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/show-header' import show_header %}
+{% from 'components/core/show-item' import show_item %}
+{% import 'components/core/forms' as forms %}
+{% set values = {
+    'true' : 'True',
+    'false' : 'False',
+} %}
+
+{% extends 'components/core/student-layout' %}
+
+{% block content %}
+{{ vite('resources/js/text-editor.js')|raw }}
+
+{{ breadcrumb() }}
+
+<div class="flex flex-1 flex-col max-w-full gap-y-4">
+    <div class="flex">
+        <div class="flex flex-1 md:w-4/5 flex-col prose prose-lg ml-8 max-w-none self-center">
+            <h2>🧠 <strong>Sum of Two Numbers</strong></h2>
+        </div>
+        <div class="flex flex-col md:w-1/5 ml-auto max-w-full gap-y-4 mr-8 max-h-fit rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5">
+            {{ show_item('Duration', '90 minutes')}}
+            {{ show_item('Question', '15/80')}}
+        </div> 
+    </div>
+
+    <div class="flex md:flex-row max-w-full w-full">
+        <div class="flex flex-1 w-full md:w-1/2 flex-col mx-8 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5">
+            <div class="flex flex-col p-4 gap-y-4 justify-between w-full">
+                <div class="flex flex-1 rounded-t-md">
+                    <div class="flex flex-col flex-1 w-full overflow-auto ">
+                        <div class="flex w-full bg-gray-800 p-2 rounded-t-md justify-between">
+                            <h1 class="text-gray-50 p-2 font-semibold text-lg">
+                                Instruction
+                            </h1>
+                        </div>
+                        <div class="flex flex-1 flex-col prose prose-sm max-w-none p-4 border-1 border-gray-200">
+                        <p>Write a function that takes two numbers as input and returns their sum.</p>
+                        
+                        </div>
+                    </div>
+                </div>
+                <div id="validate-div" class="flex flex-1 p-4 bg-gray-500 my-4 rounded-lg text-white"> validation results here</div>
+            </div>
+        </div>
+        <div class="flex flex-1 w-full md:w-1/2  flex-col mx-8 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-950/5">
+            <div class="flex flex-col flex-1 min-w-0 ">
+                <div class="flex h-16 pb-4 justify-between">
+                    <div class="flex">
+                        {{ forms.form_field(
+                            label:forms.label(
+                                id:'programming_language', 
+                                content:'Programming Language', 
+                                attributes:{
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'\*\']'}
+                                    ),
+                            input:forms.select(
+                                name:'programming_language', 
+                                values:programming_languages, 
+                                attributes:{
+                                    'class':'flex-1 cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                    'hx-on:change':'switchLanguageFromEvent(event)',
+                                    'required':true
+                                }
+                            )
+                        )}}
+                    </div>
+                    <div class="flex">
+                        <button form="validate-complete-solution-form" type="submit" class="cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm"
+                            hx-on:click="validateLanguageCompleteSolution()">
+                        Test
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-y-4">
+                    <div class="flex flex-1 flex-col rounded-md">
+                        <div class="flex w-full bg-gray-800 p-2 rounded-t-md">
+                            <p class="bg-gray-800 text-gray-50 font-semibold p-4 text-sm">Initial Solution</p>
+                        </div>
+                        <div class="flex">
+                            <div id="solution-div" class="flex-1 min-h-48 max-h-48 overflow-y-auto text-gray-500 border-1 border-gray-500"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-1 flex-col rounded-md">
+                        <div class="flex w-full bg-gray-800 p-2 justify-between rounded-t-md">
+                            <p class="bg-gray-800 text-gray-50 font-semibold p-4 text-sm">Sample Test Case</p>
+                        </div>         
+                        <div class="flex">
+                            <div id="test-case-div" class="flex-1 min-h-48 max-h-48 overflow-y-auto text-gray-500 border-1 border-gray-500"></div>
+                        </div>
+                    </div>
+                </div>     
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class="flex mx-8 gap-x-4">
+        <a href="/student/exams/exam.id/iden-example" class="p-2 max-h-fit bg-orange-500 rounded-lg font-medium text-white hover:bg-orange-400 hover:text-gray-50 cursor-pointer">
+            Back
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+            <path fill-rule="evenodd" d="M11.03 3.97a.75.75 0 0 1 0 1.06l-6.22 6.22H21a.75.75 0 0 1 0 1.5H4.81l6.22 6.22a.75.75 0 1 1-1.06 1.06l-7.5-7.5a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+            </svg>
+        </a>
+        <a href="/student/exams/exam.id/result" class="p-2 max-h-fit bg-orange-500 rounded-lg font-medium text-white hover:bg-orange-400 hover:text-gray-50 cursor-pointer">
+            Next
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+            <path fill-rule="evenodd" d="M12.97 3.97a.75.75 0 0 1 1.06 0l7.5 7.5a.75.75 0 0 1 0 1.06l-7.5 7.5a.75.75 0 1 1-1.06-1.06l6.22-6.22H3a.75.75 0 0 1 0-1.5h16.19l-6.22-6.22a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+            </svg> 
+        </a>
+    </div>
+</div>
+<form   id="validate-complete-solution-form"
+        class="hidden"
+        hx-post="/questions/create/validate-complete-solution"
+        hx-target="#validate-div"
+        hx-swap="outerHTML">
+    {{ csrf_field() }}
+    <textarea class="hidden" name="validate-complete-solution" id="validate-complete-solution-input" ></textarea>
+    <textarea class="hidden" name="validate-test-case" id="validate-test-case-input" ></textarea>
+    <input type="text" class="hidden" name="language-to-validate" id="language_to_validate-input">
+</form>
+{% endblock %}

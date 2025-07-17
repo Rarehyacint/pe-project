@@ -1,0 +1,18 @@
+{% import 'components/core/forms' as forms %}
+
+{% for id, role in roles %}    
+    {% if role != "super_admins" %}
+        <tr class="hover:bg-gray-50">
+                <td class="p-2 border-b border-gray-300 text-sm">
+                    {{ forms.checkbox(
+                                    name:'roles[]', 
+                                    id:id, value:id, 
+                                    isOwn: (role in user_roles) ? true : false,
+                                )}}
+                </td>
+                <td class="p-2 border-b border-gray-300 text-sm">
+                    {{ forms.label(id:id, content:role|replace({'_': ' '})|title) }}
+                </td>
+        </tr>
+    {% endif %}
+{% endfor %}

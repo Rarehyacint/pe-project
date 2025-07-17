@@ -1,0 +1,68 @@
+{% macro table(headers, rows, header_attributes, row_attributes, url, actions = true, openAction = true, authorized = false, forAdmin = false, forAdding = false, forRemoving = false, exam_id) %}
+    <table class="table-auto min-w-max w-full text-left bg-white border-t border-gray-300 rounded-t-2xl">
+        <thead>
+            <tr>
+                {% for header in headers %}
+                    <th class="px-4 py-2 font-bold border-b border-gray-300 text-sm bg-gray-100 text-blue-900">{{ header }}</th>
+                {% endfor %}
+                {% if actions %}
+                    <th class="px-4 py-2 font-bold border-b border-gray-300 text-sm bg-gray-100 text-blue-900 ml-auto">Actions</th>
+                {% endif %}
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr class="hover:bg-gray-50">
+                    {% for cell in row %}
+                        <td class="p-4 border-b border-gray-300 max-w-xs text-sm {{ cell == 'Incomplete' ? 'text-red-600' : (cell == 'Complete' ? 'text-green-600' : '') }} ">
+                            <span class="block truncate">{{ cell }}</span>
+                        </td>
+                    {% endfor %}
+                    {% if actions %}
+                        <td class="p-4 max-w-48  border-b border-gray-300">
+                            {% if openAction %}
+                                 <a href="/{{ url }}/{{ row.id }}" class="text-blue-900 text-sm font-medium hover:underline">Open</a>
+                            {% endif %}
+                            {% if forAdmin %}
+                                <button 
+                                    class="text-blue-900 text-sm font-medium hover:underline"
+                                    hx-get="/admins/{{ url }}/{{ row.id }}"
+                                    hx-swap="innerHTML transition:true" 
+                                    hx-target="#access-control-content" >
+                                    See
+                                </button>
+                            {% endif %}
+                                
+                            {% if forAdding %}
+                                <button 
+                                    id="fade-me-out"
+                                    type="button"
+                                    hx-post="/exams/{{ exam_id }}/builder/add-question/{{ row.id }}"
+                                    hx-target="closest tr"
+                                    hx-swap="delete transition:true"
+                                    hx-headers='{"X-CSRF-TOKEN": "{{ csrf_token() }}"}'
+                                    hx-select-oob="#question-count-field, #subject-field, #topic-field, #type-field, #exam-question-field, #available-question-field, #score-count-field"
+                                    class="text-blue-900 text-sm font-medium hover:underline"
+                                    >
+                                    {% if not forRemoving %}
+                                        Add
+                                    {% else %}
+                                        Remove
+                                    {% endif %}
+                                </button>
+                            {% endif %}
+                            {% if authorized %}
+                            <a href="/{{ url }}/edit" class="pl-4 text-orange-400 text-sm font-medium hover:underline">Edit</a>
+                            <a href="/{{ url }}/show" class="pl-4 text-red-600 text-sm font-medium hover:underline">Delete</a>
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+{% endmacro %}
+
+
