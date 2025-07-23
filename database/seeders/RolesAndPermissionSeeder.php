@@ -19,7 +19,7 @@ class RolesAndPermissionSeeder extends Seeder
         // Access Control Permissions
         Permission::create(['name' => 'view access control']);
         Permission::create(['name' => 'view faculty']);
-        Permission::create(['name' => 'view student']);
+        Permission::create(['name' => 'view student']); 
 
 
 

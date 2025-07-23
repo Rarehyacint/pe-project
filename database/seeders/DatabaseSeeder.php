@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
         $this->call(class: RolesAndPermissionSeeder::class);
         $this->call(class: CourseSeeder::class);
         $this->call(class: SuperAdminSeeder::class);
+        $this->call(NotificationSeeder::class);
+
 
         User::create([
             'first_name' => 'Faculty',

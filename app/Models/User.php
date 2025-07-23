@@ -64,4 +64,12 @@ class User extends Authenticatable
     {
         return $this->courses()->pluck('courses.id')->toArray();
     }
+
+    public function notifications()
+{
+    return $this->belongsToMany(Notification::class, 'notification')
+                ->withPivot('is_read')
+                ->withTimestamps();
+}
+
 }
