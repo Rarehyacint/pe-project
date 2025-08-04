@@ -9,6 +9,7 @@ use App\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TopicController;
+use App\Http\Controllers\NotificationController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -243,9 +244,7 @@ Route::prefix('')->middleware(['can:view faculty'])->group(function () {
         return view('reports');
     });
 
-    Route::get('/notifications', function(){
-        return view('notifications');
-    });
+    Route::get('/notifications', [NotificationController::class, 'index']);
 
     Route::get('/settings', function(){
         return view('settings');
