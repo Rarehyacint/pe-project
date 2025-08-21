@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('notifications', function (Blueprint $table) {
-            $table->boolean('is_public')->default(false);
+           $table->boolean('is_public')->default(false)->after('message');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('notifications', function (Blueprint $table) {
-            //
+            $table->dropColumn('is_public');
         });
     }
 };
