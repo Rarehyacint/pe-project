@@ -25,7 +25,7 @@ class SendResultsNotification
                 $exam = $event->exam;
 
         // Notify all students enrolled in this exam
-        foreach ($exam->students as $student) {
+        foreach ($exam->users as $student) {
             $notif = Notification::create([
                 'title'   => 'Results Published',
                 'message' => "Your results for {$exam->name} are now available.",
