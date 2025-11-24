@@ -36,7 +36,7 @@ class QuestionController extends Controller
             return [
                 'id' => $question->id,
                 'name' => $question->name,
-                'subject' => $question->topic->subject->name,
+                'subject' => $question->topic->subject->code,
                 'topic' => $question->topic->name,
                 'type' => $question->question_type->name,
                 'author' => $question->author->getFullName() ?? "No Author"
@@ -50,7 +50,7 @@ class QuestionController extends Controller
             'url' => 'questions'
         ];
 
-        if (request()->hasHeader('HX-Request')) {
+        if (request()->hasHeader('HX-Request') && !request()->hasHeader('HX-History-Restore-Request')) {
             // Return only the partial view for HTMX
             return view('components/core/index-table', $data);
         }
@@ -101,9 +101,7 @@ class QuestionController extends Controller
     public function createCodingQuestion(){
         $courses = $this->userService->getCoursesForUser(auth()->user())->pluck('name', 'id');
         $programming_languages = [
-            'java' => "Java",
-            'c++' => "C++",
-            'python' => "Python",
+            'java' => "Java"
         ];
 
         $markdown = Str::of('- *Laravel*')->markdown();
@@ -135,6 +133,8 @@ class QuestionController extends Controller
                     $rules['syntax_points_deduction'] = ['required', 'integer', 'min:1', 'max:10'];
                     $rules['runtime_points_deduction'] = ['required', 'integer', 'min:1', 'max:10'];
                     $rules['test_case_points_deduction'] = ['required', 'integer', 'min:1', 'max:10'];
+                    $rules['syntax_only_checkbox'] = ['nullable'];
+                    $rules['enable_student_compile'] = ['nullable'];
                     $rules['instruction'] = ['required'];
                     $rules['supported_languages'] = ['required', 'json', function ($attribute, $value, $fail) {
                         $decoded = json_decode($value, true);
@@ -204,10 +204,15 @@ class QuestionController extends Controller
         $data['optional_tags'] = $optional_tags;
 
         if ($question_type == 'coding'){
+            $is_syntax_only = request()->input('syntax_only_checkbox') ?? false;
             $syntax_points = request()->input('syntax_points', 0);
             $runtime_points = request()->input('runtime_points', 0);
             $test_case_points = request()->input('test_case_points', 0);
-            $totalPoints = $syntax_points + $runtime_points + $test_case_points;
+            if ($is_syntax_only){
+                $totalPoints = $syntax_points;
+            } else {
+                $totalPoints = $syntax_points + $runtime_points + $test_case_points;
+            }
             $data['points'] = $totalPoints;
         } else if ($question_type == 'ranking' || $question_type == 'matching'){
             $items = request()->input('items', []);
@@ -289,7 +294,6 @@ class QuestionController extends Controller
             ];
         }
 
-
        switch ($question_type) {
             case('coding'):
                     $rules['syntax_points'] = ['required', 'integer', 'min:1'];
@@ -298,6 +302,8 @@ class QuestionController extends Controller
                     $rules['syntax_points_deduction'] = ['required', 'integer', 'min:1', 'max:10'];
                     $rules['runtime_points_deduction'] = ['required', 'integer', 'min:1', 'max:10'];
                     $rules['test_case_points_deduction'] = ['required', 'integer', 'min:1', 'max:10'];
+                    $rules['syntax_only_checkbox'] = ['nullable'];
+                    $rules['enable_student_compile'] = ['nullable'];
                     $rules['instruction'] = ['required'];
                     $rules['supported_languages'] = ['required', 'json', function ($attribute, $value, $fail) {
                         $decoded = json_decode($value, true);
@@ -354,6 +360,8 @@ class QuestionController extends Controller
         $validator = Validator::make(request()->all(), $rules, $messages);
         if ($validator->fails()) {
             if($question_type == 'coding'){
+                                dd($validator->errors());
+
                 return view('components/core/coding-question-error', [
                     'errors' => $validator->errors()
                 ]);
@@ -377,10 +385,15 @@ class QuestionController extends Controller
         $data['optional_tags'] = $optional_tags;
 
         if ($question_type == 'coding'){
+            $is_syntax_only = request()->input('syntax_only_checkbox') ?? false;
             $syntax_points = request()->input('syntax_points', 0);
             $runtime_points = request()->input('runtime_points', 0);
             $test_case_points = request()->input('test_case_points', 0);
-            $totalPoints = $syntax_points + $runtime_points + $test_case_points;
+            if ($is_syntax_only){
+                $totalPoints = $syntax_points;
+            } else {
+                $totalPoints = $syntax_points + $runtime_points + $test_case_points;
+            }
             $data['points'] = $totalPoints;
         } else if ($question_type == 'ranking' || $question_type == 'matching'){
             $items = request()->input('items', []);
@@ -565,6 +578,7 @@ class QuestionController extends Controller
 
     public function validateCompleteSolution(Request $request){
         $code_settings['action'] = $request->post('action');
+        $code_settings['syntax_coding_question_only'] = $request->post('syntax_only_checkbox') ? true : false;
         $language = $request->post('language-to-validate');
 
         if ($code_settings['action'] == 'test_student_code') {
@@ -585,8 +599,13 @@ class QuestionController extends Controller
             $code_settings['test_case_points_deduction'] = 1;
 
         } else {
+            if (!$code_settings['syntax_coding_question_only']){
+                $test_case = $request->post('validate-test-case');
+            } else {
+                $test_case = '';
+            };
+
             $code = $request->post('validate-complete-solution');
-            $test_case = $request->post('validate-test-case');
             $code_settings['syntax_points'] = $request->post('validate_syntax_points') ?? 0;
             $code_settings['runtime_points'] = $request->post('validate_runtime_points') ?? 0;
             $code_settings['test_case_points'] = $request->post('validate_test_case_points') ?? 0;
@@ -594,8 +613,10 @@ class QuestionController extends Controller
             $code_settings['runtime_points_deduction'] = $request->post('validate_runtime_points_deduction') ?? 1;
             $code_settings['test_case_points_deduction'] = $request->post('validate_test_case_points_deduction') ?? 1;
         }
-        if (empty($code) || empty($test_case)) {
-            $api_data = ['error' => 'Complete solution and test case are both required.'];
+        if (empty($code) && $code_settings['syntax_coding_question_only'] == true) {
+            $api_data = ['error' => 'Complete solution is required.'];
+        } else if (empty($code) || empty($test_case) && $code_settings['syntax_coding_question_only'] == false){
+            $api_data = ['error' => 'Complete solution and Test Cases are both required.'];
         } else {
             $api_data = $this->questionService::validate($language, $code, $test_case, $code_settings);
         }

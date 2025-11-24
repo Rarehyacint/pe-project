@@ -1,11 +1,16 @@
 <?php
 
 namespace App\Services;
+use App\Jobs\SubmitExpiredPaper;
 use App\Models\Exam;
+use App\Models\ExamRecord;
 use App\Models\Question;
 use App\Models\StudentAnswer;
 use App\Models\StudentPaper;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
+use App\Events\ExamSubmitted;
 use DB;
 use Storage;
 use Str;
@@ -31,7 +36,8 @@ class ExamTakingService
         $now = now();
         if ($exam->examination_date && $exam->expiration_date) {
             if ($now >= $exam->examination_date && $now <= $exam->expiration_date) {
-                return false;
+                // return false;
+                return true; // dapat pwede ka magtake ng exam
             }
         }
 
@@ -47,7 +53,11 @@ class ExamTakingService
 
     public function getAttemptsLeft(Exam $exam, User $user){
         $get_student_paper_count = $user->exams()->where('exam_id', $exam->id)->withCount('studentPapers')->first()->student_papers_count;
-        $attempt_left = max(0, $exam->retakes - $get_student_paper_count);
+        if ($exam->retakes == null){
+            $attempt_left = 99;
+        } else {
+            $attempt_left = max(0, $exam->retakes - $get_student_paper_count);
+        }
         return $attempt_left;
     }
 
@@ -72,6 +82,7 @@ class ExamTakingService
 
     public function generateExamPaper(Exam $exam, User $user){
         $exam->load('questions');
+        $exam_duration = $exam->duration ?? null;
         // Prepare student paper information
         $shuffled_ids = self::applyKnuthShuffleToExam($exam);
         $question_count = count($shuffled_ids);
@@ -82,8 +93,10 @@ class ExamTakingService
             'user_id' => $user->id,
             'questions_order' => json_encode($shuffled_ids),
             'question_count' => $question_count,
-            'current_position' => 0
+            'current_position' => 0,
+            'expired_at' => $exam_duration != null ? now()->addMinutes($exam_duration) : null
         ]);
+
 
         foreach($shuffled_ids as $id){
             StudentAnswer::create([
@@ -97,6 +110,10 @@ class ExamTakingService
 
         $exam->unsetRelation('questions');
         $student_paper->questions_in_array = $questions;
+
+        if($student_paper->expired_at != null){
+            SubmitExpiredPaper::dispatch($student_paper, $this, $user)->delay(now()->addMinutes($exam->duration));
+        }
 
         return $student_paper;
     }
@@ -149,10 +166,16 @@ class ExamTakingService
             } 
         }
 
+
         $question_data = [
             'question' => $question,
             'question_type_data' => $filtered_question_type
         ];
+        
+        if($student_answer->first_viewed_at == null){
+            $student_answer->update(['first_viewed_at' => now()]);
+        }
+
         return $question_data;
     }
 
@@ -251,6 +274,184 @@ class ExamTakingService
             }
             return null;
         })->filter()->values();
+    }
+
+    public static function submitPaperIfExpired(StudentPaper $student_paper){
+        if ($student_paper->isSubmitted()){
+            return false;
+        }
+
+        if ($student_paper->isExpired()){
+            $student_paper->status = "auto_completed";
+            return true;
+        }
+
+        return false;
+    }
+
+    public function submitPaper(StudentPaper $student_paper, User $user){
+        // validate that the student_paper's author is the authenticated user
+        $student_paper->update(['submitted_at' => now()]);
+
+        $exam_id = $student_paper->exam->id;
+        $exam = Exam::find($exam_id);
+
+        $attempt_count = ExamRecord::whereHas('studentPaper', function($query) use ($exam_id, $student_paper) {
+            $query->where('exam_id', $exam_id)
+                ->where('user_id', $student_paper->user_id);
+        })->count();
+        
+        // AGGREGATE student points by subjects, get subject id, subject name, sum of student points for that subject, sum of obtainable points for subject
+        $subject_table = DB::table('student_answers')
+            ->join('questions', 'student_answers.question_id', '=', 'questions.id')
+            ->join('topics', 'questions.topic_id', '=', 'topics.id')
+            ->join('subjects', 'topics.subject_id', '=', 'subjects.id')
+            ->where('student_answers.student_paper_id', $student_paper->id)
+            ->groupBy('subjects.id', 'subjects.name')
+            ->select(
+                'subjects.id as id',    
+                'subjects.name as subject_name',
+                DB::raw('SUM(student_answers.points) as subject_score_obtained'),
+                DB::raw('SUM(questions.total_points) as subject_score'))
+            ->get()
+            ->keyBy('id');
+
+        $total_score = $subject_table->sum('subject_score_obtained');
+        $date_taken = $student_paper->created_at;
+        
+        $time_taken = round($student_paper->created_at->diffInMinutes($student_paper->submitted_at));
+
+        $exam_record = $student_paper->examRecord()->updateOrCreate(
+        ['student_paper_id' => $student_paper->id],
+            [
+                    'attempt' => $attempt_count + 1,
+                    'total_score' => $total_score,
+                    'date_taken' => $date_taken,
+                    'time_taken' => $time_taken,
+            ]);
+
+        $transformed_subject_table = $subject_table->map(function ($item) use ($exam_record) {
+            return [
+                'exam_record_id'   => $exam_record->id,
+                'subject_id'       => $item->id,
+                'subject_name'     => $item->subject_name,
+                'score_obtained'   => (int) $item->subject_score_obtained,
+                'score'            => (int) $item->subject_score,
+                'created_at'       => now(),
+                'updated_at'       => now(),
+            ];
+        })->values()->toArray();
+
+        DB::table('exam_records_subjects')->upsert(
+        $transformed_subject_table,
+        ['exam_record_id', 'subject_id'],
+        ['score_obtained', 'score', 'updated_at']
+        );
+        
+        $coding_question_answers_pattern = "user:{$user->id}:paper:{$student_paper->id}:language:*:answer:*:code";
+
+        $keys = Redis::keys($coding_question_answers_pattern);
+
+        if (!empty($keys)) {
+            Self::storeCodeToJSON($user->id, $student_paper->id);
+        } else {
+            $score = $exam_record->total_score;
+
+            if ($score == $exam->max_score) {
+                $status = 'perfect_score';
+            } elseif ($score >= $exam->max_score * ($exam->passing_score / 100)) {
+                $status = 'pass';
+            } else {
+                $status = 'more_review';
+            }
+
+            $exam_record->update(['status' => $status]);
+            
+            if($student_paper->status != "auto_completed"){
+                $student_paper->update(['status'  => 'completed']);
+            }
+        }
+
+        // Dispatch ExamSubmitted after commit so listeners see consistent DB state
+        DB::afterCommit(function () use ($user, $exam) {
+            event(new ExamSubmitted($user, $exam));
+        });
+
+        return [
+            'exam' => $exam,
+            'exam_record' => $exam_record,
+        ];
+    }
+
+    private static function storeCodeToJSON($user_id, $student_paper_id){
+        $pattern = "user:$user_id:paper:$student_paper_id:language:*:answer:*:code";
+        // $student_paper_date = StudentPaper::find($student_paper_id)->submitted_at;
+        // $student_paper_submitted_at_unix = (String) Carbon::parse($student_paper_date)->timestamp;
+        // $key = $student_paper_submitted_at_unix . '-' . $user_id;
+
+        $keys = Redis::keys($pattern); 
+        // $values = Redis::mget($keys);
+        $data = [];
+
+        foreach ($keys as $index => $key) {
+            try {
+                $hashData = Redis::hgetall($key);
+
+                preg_match('/paper:([^:]+)/', $key, $student_paper_matches);
+                $student_paper_id = (int)$student_paper_matches[1] ?? null;
+
+                preg_match('/language:([^:]+)/', $key, $language_matches);
+                $language = $language_matches[1] ?? null;
+
+                preg_match('/answer:(\d+)/', $key, $answer_matches);
+                $answer_id = isset($answer_matches[1]) ? (int)$answer_matches[1] : null;
+
+                preg_match('/coding_answer:(\d+)/', $key, $coding_answer_matches);
+                $coding_answer_id = isset($coding_answer_matches[1]) ? (int)$coding_answer_matches[1] : null;
+
+
+                $data[] = [
+                    'student_paper_id' => $student_paper_id,
+                    'answer_id' => $answer_id,
+                    'coding_answer_id'     => $coding_answer_id,
+                    'language'      => $language,
+                    'data'          => $hashData,
+                ];
+                
+                Redis::del($key);
+            } catch (\Exception $e) {
+                // log the error
+                continue;
+            }
+        }
+
+        $json_pretty_print = json_encode($data, JSON_PRETTY_PRINT);
+        $json = json_encode($data);
+
+        $folder = "codeInJSON/";
+
+        $answer_file_path = "{$folder}user_{$user_id}:paper_{$student_paper_id}.json";
+
+        Storage::makeDirectory($folder);
+        Storage::put($answer_file_path, $json_pretty_print);
+        
+        Redis::XADD("code_checker", '*', ["data" => $json]);
+
+    }
+
+    public function getExamRecordFromStudentPaper(StudentPaper $student_paper){
+        $exam_record = ExamRecord::where('student_paper_id', "=", $student_paper->id)->get();
+        if ($exam_record ){
+            $exam = $student_paper->exam;
+
+            $exam_result = [
+                'exam' => $exam,
+                'exam_record' => $exam_record
+            ];
+            return $exam_result;
+        } else {
+            return false;
+        }
     }
 
 }

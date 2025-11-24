@@ -39,7 +39,7 @@ class LandingPageController extends Controller
     }
 
     public function examReportShow(){
-        $exam_dashboard_data = Http::timeout(30)->get('http://fastapi:80/api/dashboard/load-exam')->json();
+        $exam_dashboard_data = Http::timeout(30)->get('http://fastapi:8080/api/dashboard/load-exam')->json();
         $examination_dates = collect($exam_dashboard_data['examination_dates'])
             ->map(function ($row) {
                 return [
@@ -108,7 +108,7 @@ class LandingPageController extends Controller
     public function specificCourseReportShow(Request $request){
         $course_id = $request->query('course');
         $course_dashboard_data = Http::timeout(30)
-            ->get("http://fastapi:80/api/dashboard/load-course/{$course_id}")
+            ->get("http://fastapi:8080/api/dashboard/load-course/{$course_id}")
             ->json();
 
         $subject_graph_data = collect($course_dashboard_data['subject_table'])->map(function ($row) {
@@ -170,7 +170,7 @@ class LandingPageController extends Controller
     }
 
     public function refreshDashboard(){
-        Http::timeout(30)->get("http://fastapi:80/api/dashboard/refresh");
+        Http::timeout(30)->get("http://fastapi:8080/api/dashboard/refresh");
 
         return response('', 200)->header('HX-Refresh', 'true');
     }

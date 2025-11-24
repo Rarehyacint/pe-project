@@ -1,6 +1,6 @@
 {% macro show_item(label, value, label_attributes, value_attributes) %}
     <div class="flex gap-x-2 text-pretty break-keep">
-        <span class="{{ label_attributes ? label_attributes ~ ' font-medium' : 'font-medium shrink-0' }}">
+        <span class="{{ label_attributes ? label_attributes ~ ' font-medium' : 'font-medium shrink-0 text-gray-900' }}">
             {{ label }} : 
         </span>
         <p class="{{ value_attributes }}">

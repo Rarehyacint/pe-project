@@ -12,8 +12,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /var/www
 
 # Copy Laravel application code
-COPY . /var/www
-
+COPY package*.json vite.config.* ./
+COPY resources ./resources
+COPY public ./public
 # Install Node.js dependencies and build assets
 RUN npm install && npm run build
 

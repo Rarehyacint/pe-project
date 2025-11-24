@@ -1,15 +1,36 @@
 {% from 'components/core/show-header' import show_header %}
 {% from 'components/core/show-item' import show_item %}
-
+{% if is_expired %}
 <div class="flex flex-col">
-    <div class="flex-1 prose max-w-none">
+    <div class="flex-1 prose max-w-none pointer-events-none select-none">
+        <h2 class="flex border-b-2 p-2 border-gray-900">Exam has Expired.</h2>
+    </div>
+    <div id="answer-form" class="flex gap-x-2 p-2 select-none" hx-sync="this:queue">
+        Submitting The Exam
+        <div id="svg-loader"
+            class="flex flex-row items-center justify-center gap-1">
+            <div class="w-2 h-2 rounded-full bg-blue-900 animate-bounce [animation-delay:.1s]"></div>
+            <div class="w-2 h-2 rounded-full bg-blue-900 animate-bounce [animation-delay:.2s]"></div>
+            <div class="w-2 h-2 rounded-full bg-blue-900 animate-bounce [animation-delay:.3s]"></div>
+        </div>
+        <button hx-get="{{ route('exam_papers.auto_completed_redirect', {student_paper : student_paper} ) }}"
+                hx-trigger="every 2s"
+                hx-swap="outerHTML"
+                type="button" 
+                class="hidden">
+        </button>
+    </div>
+</div>
+{% else %}
+<div class="flex flex-col">
+    <div class="flex-1 prose max-w-none pointer-events-none select-none">
         <h2 class="flex border-b-2 p-2 border-gray-900">{{ student_paper.current_position + 1 }}. {{ question.name }}</h2>
     </div>
-    <div id="answer-form" class="flex flex-col gap-y-2 p-4" hx-sync="this:queue">
+    <div id="answer-form" class="flex flex-col gap-y-2 p-4 select-none" hx-sync="this:queue">
         {% include 'students/papers/question_type_show' with { 'question':question, 'question_type_data':question_type_data} %}
     </div>
 </div>
-<div class="flex mt-8 gap-x-2 justify-end">
+<div class="flex mt-8 gap-x-2 justify-between">
     {% if student_paper.current_position != 0 %}
         <button hx-patch="{{ route('student_answer.update', {student_paper : student_paper, question:question} ) }}"
                 hx-target="#exam-content"
@@ -37,7 +58,7 @@
                 hx-vals='{"action":"next"}'
                 type="button" 
                 id="next"
-                class="flex gap-x-1 justify-center items-center p-2 bg-blue-900 duration-300 transition rounded-lg font-medium text-white hover:bg-blue-700 hover:text-gray-50 cursor-pointer">
+                class="flex gap-x-1 justify-center self-end items-center p-2 bg-blue-900 duration-300 transition rounded-lg font-medium text-white hover:bg-blue-700 hover:text-gray-50 cursor-pointer">
             Next
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
         <path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd" />
@@ -61,3 +82,4 @@
         </button>
     {% endif %}
 </div>
+{% endif %}

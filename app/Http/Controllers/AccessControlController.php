@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicYear;
 use App\Models\User;
+use App\Rules\NoAcademicYearCollisions;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Validator;
@@ -12,59 +15,53 @@ use Illuminate\Support\Facades\Validator;
 class AccessControlController extends Controller
 {
 
-    public function index(){
-        return view('admins/access-control');
-    }
-
-    public function redirect(){
-        return redirect('/admins/access-control');
-    }
-
-    public function viewUsers(){
+    public function indexUsers(){
         $currentUser = request()->user();
-        $users = User::all();
+        $users = User::paginate(10);
         $header = ['ID', 'Name', 'email', 'Date Created'];
         $rows = $users->map(function ($user) {
             return [
                 'id' => $user->id,
                 'name' => $user->getFullName(),
                 'email' => $user->email,
-                'Date Created' => Carbon::parse($user->created_at)->format('m/d/Y')
+                'Date Created' => Carbon::parse($user->created_at)->format('M d Y')
             ];
         });
 
         $data = [
-            'users' => $users, 
+            'models' => $users, 
             'currentUser' => $currentUser,
             'header' => $header,
             'rows' => $rows,
-            'url' => 'users',
-            'paginates' => $users
+            'url' => 'users'
         ];
 
-        return view('/admins/load-table', $data);
+        return view('admins/access-control', $data);
     }
 
-    public function viewRoles(){
-        $roles = Role::all();
+    public function redirect(){
+        return redirect('/admins/users');
+    }
+
+    public function indexRoles(){
+        $roles = Role::paginate(10);
         $header = ['ID', 'Name', 'Date Created'];
         $rows = $roles->map(function ($role) {
             return [
                 'id' => $role->id,
                 'name' => $role->name,
-                'Date Created' => Carbon::parse($role->created_at)->format('m/d/Y')
+                'Date Created' => Carbon::parse($role->created_at)->format('M d Y')
             ];
         });
 
         $data = [
-            'roles' => $roles, 
+            'models' => $roles, 
             'header' => $header,
             'rows' => $rows,
-            'url' => 'roles',
-            'paginates' => $roles
+            'url' => 'roles'
         ];
 
-        return view('/admins/load-table', $data);
+        return view('admins/roles', $data);
     }
 
     public function showRole(Role $role){
@@ -95,7 +92,7 @@ class AccessControlController extends Controller
 
         $role->syncPermissions($role_permissions);
 
-        return redirect('/admins/load-roles');
+        return redirect()->route('admin.roles.show', $role);
     }
 
     public function editRole(Role $role){
@@ -132,8 +129,7 @@ class AccessControlController extends Controller
 
         $role->syncPermissions($role_permissions);
 
-        return redirect()->route('admin.roles.show', $role)
-        ->with('success', 'User updated successfully.');    
+        return redirect()->route('admin.roles.show', $role);    
     }
 
     public function destroyRole(Role $role){
@@ -141,78 +137,7 @@ class AccessControlController extends Controller
 
         $role->delete();
 
-        return redirect('/admins/load-roles');
-
-    }
-
-    public function viewPermissions(){
-        $permissions = Permission::all();
-        $header = ['ID', 'Name', 'Date Created'];
-        $rows = $permissions->map(function ($permission) {
-            return [
-                'id' => $permission->id,
-                'name' => $permission->name,
-                'Date Created' => Carbon::parse($permission->created_at)->format('m/d/Y')
-            ];
-        });
-
-        $data = [
-            'permissions' => $permissions, 
-            'header' => $header,
-            'rows' => $rows,
-            'url' => 'permissions'
-        ];
-
-        return view('admins/load-table', $data);
-    }
-
-    public function createPermission(){
-        return view('permissions/create');
-    }
-
-    public function storePermission(){
-        Permission::create(['name' => request('name')]);
-
-        return redirect('/admins/load-permissions');
-    }
-
-    public function showPermission(Permission $permission){
-        return view('/permissions/show', ['permission' => $permission]);
-    }
-
-    public function editPermission(Permission $permission){
-        return view('permissions/edit', ['permission' => $permission]);
-    }
-
-    public function updatePermission(Permission $permission) {
-        // Still need to authorize if the permission is within the CORE of the system (e.g., permission belongs to Model)
-        $validator = Validator::make(request()->all(), [
-            'name' => ['required'],
-        ]);
-    
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-    
-        $data = $validator->validated();
-    
-        $permission->update([
-            'name' => $data['name'],
-        ]);
-
-        return redirect()->route('admin.permissions.show', $permission)
-        ->with('success', 'Permission updated successfully.');    
-    }
-
-    public function destroyPermission(Permission $permission){
-        // authorize
-
-        $permission->delete();
-
-        return redirect('/admins/load-permissions');
-
+        return redirect()->route('admin.roles.index');
     }
 
     public function loadRoleCheckbox(){
@@ -230,5 +155,148 @@ class AccessControlController extends Controller
         ];
 
         return view('/roles/checkbox', $data);
+    }
+
+    public function indexAcademicYear(){
+        $header = ['Academic Year Label', 'Start Date', 'End Date'];
+
+        $academic_year = AcademicYear::orderBy('start_date', 'desc')
+                        ->orderBy('end_date', 'desc')
+                        ->get();
+        $current_academic_year = AcademicYear::current();
+        $rows = $academic_year->map(function ($year) {
+            return [
+                'id' => $year->id,
+                'year_label' => $year->year_label,
+                'start_date' => Carbon::parse($year->start_date)->format('M d Y'),
+                'end_date' => Carbon::parse($year->end_date)->format('M d Y'),
+                'is_current' => $year->isCurrent(),
+                'is_locked' => $year->is_locked
+            ];
+        });
+
+        $data = [
+            'header' => $header,
+            'rows' => $rows,
+            'current_academic_year' => $current_academic_year
+        ];
+        return view('admins/academic-year', $data);
+    }
+
+    public function createAcademicYear(){
+        return view('academic-year/create');
+    }
+
+    public function storeAcademicYear(){
+        $validator = Validator::make(request()->post(), [
+             'year_label' => [
+                'required',
+                'string',
+                'max:9',
+                Rule::unique('academic_years', 'year_label'),
+            ],
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => [
+                'required',
+                'date',
+                'after:start_date',
+                new NoAcademicYearCollisions(request()->input('start_date')),
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->view('academic-year/create', [
+                'errors' => $validator->errors(),
+                'old' => request()->all()]);
+        }
+
+        $validated = $validator->validate();
+
+        $academic_year = AcademicYear::create($validated);
+
+        session()->flash('toast', json_encode([
+            'status' => 'Created!',
+            'message' => 'Academic Year: ' . $academic_year->year_label,
+            'type' => 'success'
+        ]));
+        return response('', 200)->header('HX-Redirect', route('admin.academic-year.index'));
+    }
+
+    public function editAcademicYear(AcademicYear $academic_year){
+        $academic_year['is_current'] = $academic_year->isCurrent();
+        return view('academic-year/edit', $academic_year);
+    }
+
+    public function updateAcademicYear(AcademicYear $academic_year){
+        if ($academic_year->is_locked) {
+            session()->flash('toast', json_encode([
+                'status' => 'UPDATING NOT ALLOWED',
+                'message' => 'Academic Year: ' . $academic_year->year_label,
+                'type' => 'warning'
+            ]));
+            return response('', 200)->header('HX-Redirect', route('admin.academic-year.index'));
+        }
+        $validator = Validator::make(request()->post(), [
+            'year_label' => [
+                'required',
+                'string',
+                'max:9',
+                Rule::unique('academic_years', 'year_label')->ignore($academic_year->id),
+            ],
+            'start_date' => 'required|date|after_or_equal:today|sometimes',
+            'end_date' => [
+                'required',
+                'date',
+                'after:start_date',
+                new NoAcademicYearCollisions(request()->input('start_date'), $academic_year->id),
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->view('academic-year/edit', [
+                'id' => $academic_year->id,
+                'errors' => $validator->errors(),
+                'old' => request()->all()]
+            );
+        }
+
+        $validated = $validator->validate();
+
+        $academic_year->update($validated);
+
+        session()->flash('toast', json_encode([
+            'status' => 'Created!',
+            'message' => 'Academic Year: ' . $academic_year->year_label,
+            'type' => 'success'
+        ]));
+        return response('', 200)->header('HX-Redirect', route('admin.academic-year.index'));
+    }
+
+
+    public function destroyFormAcademicYear(AcademicYear $academic_year){
+        return view('academic-year/destroy', $academic_year);
+    }
+     public function destroyAcademicYear(AcademicYear $academic_year){
+
+        //  $this->authorize('delete', $academic_year);
+
+        if ($academic_year->isCurrent() || $academic_year->is_locked) {
+            session()->flash('toast', json_encode([
+                'status' => 'DESTROYING NOT ALLOWED',
+                'message' => 'Academic Year: ' . $academic_year->year_label,
+                'type' => 'warning'
+            ]));
+            return response('', 200)->header('HX-Redirect', route('admin.academic-year.index'));
+        }
+
+        session()->flash('toast', json_encode([
+            'status' => 'Destroyed!',
+            'message' => 'Academic Year: ' . $academic_year->year_label,
+            'type' => 'warning'
+        ]));
+
+        $academic_year->delete();
+
+        return response('', 200)->header('HX-Redirect', route('admin.academic-year.index'));
     }
 }

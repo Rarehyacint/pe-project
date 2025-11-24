@@ -59,7 +59,7 @@
                             <input type="hidden" name="courses[]" id="courses-id" />
                         </div>
                             {% if errors.get('courses.0') %}
-                                <span class="text-red-500 text-sm font-semibold whitespace-nowrap">{{ errors.get('courses.0')[0] }}</span>    
+                                <span class="add-tag-animation text-red-500 text-sm font-semibold whitespace-nowrap">{{ errors.get('courses.0')[0] }}</span>    
                             {% endif %}
                     </div>
                     <div class="flex flex-1/2 flex-col gap-y-4 w-full">
@@ -121,6 +121,7 @@
                                     'required': true
                                 }),
                             errors:errors.get('max_score'),
+                            isColumn:true 
                         )}}
                         {{ forms.form_field(
                             label:forms.label(
@@ -135,7 +136,9 @@
                                 attributes:{
                                     'class':'flex-1 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
                                     'min':0,
-                                    'placeholder':'Blank = unlimited duration'})
+                                    'placeholder':'Blank = unlimited duration'}),
+                            errors:errors.get('duration'),
+                            isColumn:true 
                         )}}
                         {{ forms.form_field(
                             label:forms.label(
@@ -150,7 +153,8 @@
                                     'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
                                     'min':1
                                 }),
-                            errors:errors.get('passing_score')
+                            errors:errors.get('passing_score'),
+                            isColumn:true 
                         )}}
                     </div>
                     <div class="flex flex-col gap-y-4 w-full">
@@ -167,7 +171,9 @@
                                 attributes:{
                                     'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
                                     'min':0,
-                                    'placeholder':'Leave blank for unlimited retakes'})
+                                    'placeholder':'Leave blank for unlimited retakes'}),
+                            errors:errors.get('retakes'),
+                            isColumn:true 
                         )}}
                         {{ forms.form_field(
                             label:forms.label(
@@ -216,94 +222,100 @@
     </form>
 </div>
 <script>
-  const container = document.getElementById("tags-container");
-  const tagsHiddenInput = document.getElementById('courses-id');
-  const tags = new Set();
+    const container = document.getElementById("tags-container");
+    const tagsHiddenInput = document.getElementById('courses-id');
+    const tags = new Set();  
 
-  const toggleBtn = document.getElementById("toggle-course-list");
-  const courseList = document.getElementById("course-list");
+    const toggle_course = document.getElementById("toggle-course-list");
+    const course_list = document.getElementById("course-list");
 
-  toggleBtn.addEventListener("click", () => {
-    courseList.classList.toggle("hidden");
-  });
+    toggle_course.addEventListener("click", () => {
+        course_list.classList.toggle("hidden");
+    });
 
-  document.addEventListener("click", (e) => {
-    if (!toggleBtn.contains(e.target) && !courseList.contains(e.target)) {
-      courseList.classList.add("hidden");
-    }
-  });
-
-  // Handle course selection
-  const courseButtons = document.querySelectorAll(".course-btn");
-
-  courseButtons.forEach(button => {
-    button.addEventListener("click", () => {
-      const tag = button.dataset.tagAbbv;
-      const tag_id = button.dataset.tagId;
-        if (tag && tag_id && !tags.has(tag_id)) {
-            addTag(tag, tag_id);
-            tags.add(tag_id);
-            updateHiddenInput();
-            courseList.classList.add("hidden");
+    document.addEventListener("click", (e) => {
+        if (!toggle_course.contains(e.target) && !course_list.contains(e.target)) {
+        course_list.classList.add("hidden");
         }
     });
-  });
 
-  function addTag(tag, tag_id) {
-    const tagEl = document.createElement("span");
-    tagEl.className = `
-      inline-flex 
-      items-center 
-      gap-1 
-      px-2 py-1 
-      bg-blue-100 
-      text-blue-900 
-      rounded-full 
-      font-semibold 
-      text-xs 
-      select-none
-      add-tag-animation
-    `;
-    tagEl.textContent = tag;
-    tagEl.dataset.tagId = tag_id;
+    // Handle course selection
+    const course_buttons = document.querySelectorAll(".course-btn");
 
-    const closeBtn = document.createElement("button");
-    closeBtn.innerHTML = "&times;";
-    closeBtn.type = "button"; 
-    closeBtn.className = `
-      text-blue-900 
-      text-sm 
-      font-bold 
-      cursor-pointer 
-      bg-transparent 
-      border-none
-    `;
-
-    closeBtn.addEventListener("click", () => {
-        tagEl.classList.add("delete-tag-animation");
-        
-        tagEl.addEventListener("animationend", () => {
-            container.removeChild(tagEl);
-            tags.delete(tag);
-            updateHiddenInput();
+    course_buttons.forEach(button => {
+        button.addEventListener("click", () => {
+        const tag = button.dataset.tagAbbv;
+        const tag_id = button.dataset.tagId;
+            if (tag && tag_id && !tags.has(tag_id)) {
+                addTag(tag, tag_id);
+                tags.add(tag_id);
+                updateHiddenInput();
+                course_list.classList.add("hidden");
+            }
         });
     });
 
-    tagEl.appendChild(closeBtn);
-    container.appendChild(tagEl);
-  }
+    function addTag(tag, tag_id) {
+        const tag_element = document.createElement("span");
+        tag_element.className = `
+        inline-flex 
+        items-center 
+        gap-1 
+        px-2 py-1 
+        bg-blue-100 
+        text-blue-900 
+        rounded-full 
+        font-semibold 
+        text-xs 
+        select-none
+        add-tag-animation
+        `;
+        tag_element.textContent = tag;
+        tag_element.dataset.tagId = tag_id;
 
-  function updateHiddenInput() {
-    document.querySelectorAll('input[name="courses[]"]').forEach(el => el.remove());
+        const tag_close_button = document.createElement("button");
+        tag_close_button.innerHTML = "&times;";
+        tag_close_button.type = "button"; 
+        tag_close_button.className = `
+        text-blue-900 
+        text-sm 
+        font-bold 
+        cursor-pointer 
+        bg-transparent 
+        border-none
+        `;
 
-    // Create new inputs
-    Array.from(tags).forEach(tagId => {
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "courses[]";
-        input.value = tagId;
-        document.getElementById("exam-form").appendChild(input); // Replace with your actual form ID
-    });
-  }
+        tag_close_button.addEventListener("click", () => {
+            tag_element.classList.add("delete-tag-animation");
+            
+            tag_element.addEventListener("animationend",  function handleAnimationEnd() {
+                tag_element.remove(); 
+                tags.delete(tag_id);
+                updateHiddenInput();
+                tag_element.removeEventListener("animationend", handleAnimationEnd);
+            });
+        });
+
+        tag_element.appendChild(tag_close_button);
+        container.appendChild(tag_element);
+    }
+
+    function updateHiddenInput() {
+        const form = document.getElementById("exam-form");
+        if (!form) return; 
+
+        form.querySelectorAll('input[name="courses[]"]').forEach(el => el.remove());
+        
+        console.log("Current selected IDs:", tags);
+        
+        Array.from(tags).forEach(tag_id => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "courses[]";
+            input.value = tag_id;
+            
+            form.appendChild(input); 
+        });
+    } 
 </script>
 {% endblock %}

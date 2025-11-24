@@ -33,10 +33,11 @@
                 </div>
                 <div class="flex flex-col w-full bg-gray-100 rounded-lg p-2">
                     <h1 class="text-md font-bold text-gray-800">Goal of this Report:</h1>
-                    <p>Explain the Goal of this report</p>
+                    <p class="text-sm font-semibold text-gray-800">
+                        This Report aims to help Faculty users gain insights from the Exam Data.
+                    </p>
                     <h1 class="text-md font-bold text-gray-800">Description of Variables:</h1>
                     <p>Explain the Bloom's level</p>
-                    <p>Explain the Scoring System for the Bloom's Level</p>
                     <p>Explain the metric that are going to be used for this report</p>
                 </div>
             </div>
@@ -176,36 +177,22 @@
                     <div class="flex relative justify-center  items-center w-full p-4 gap-0.5 shadow-sm bg-red-100 rounded-lg">
                         <div class="flex flex-col h-fit w-24 p-1">
                             <span class="text-2xl font-bold text-gray-900 self-center">
-                                {{ missing_values }}
+                                N/A
                             </span> 
                             <span class="flex text-xs gap-x-1 text-gray-500 font-mono font-semibold gap-0.5 justify-center items-center mt-auto">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                <path d="M6.75 8.25a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5Z" />
-                                <path fill-rule="evenodd" d="M9 2a7 7 0 1 0 4.391 12.452l3.329 3.328a.75.75 0 1 0 1.06-1.06l-3.328-3.329A7 7 0 0 0 9 2ZM3.5 9a5.5 5.5 0 1 1 11 0 5.5 5.5 0 0 1-11 0Z" clip-rule="evenodd" />
-                                </svg>
-
-                                Missing <br> values
+                                N/A
                             </span>
                         </div> 
                         <div class="flex flex-col h-fit w-24 p-1">
                             <span class="text-2xl font-bold text-gray-900 self-center">
-                                {{ duplicates_dropped }}
+                                N/A
                             </span> 
                             <span class="flex text-xs gap-x-1 text-gray-500 font-mono font-semibold gap-0.5 justify-center items-center mt-auto">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                                <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z" clip-rule="evenodd" />
-                                </svg>
-
-                                Duplicates <br> Dropped
+                                N/A
                             </span>
-                        </div>                           
-                        <div class="flex p-1 gap-y-2">
-                            <span class="flex text-xs text-gray-800 font-semibold gap-0.5 items-center mt-auto">
-                                * Missing values are imputed with the mean
-                            </span>
-                        </div>
+                        </div>            
                         <span class="absolute bottom-1 right-2 text-xs text-gray-800 font-semibold">
-                            Data Cleaning
+                            ####
                         </span>                    
                     </div>
                 </div>
@@ -404,7 +391,8 @@
         <div id="reports_level_scores_data" data-level-scores="{{ level_scores|json_encode() }}" class="hidden"></div>
         <div id="reports_type_with_level_scores_data" data-type-scores="{{ exam_compare_types_and_blooms_data|json_encode() }}" class="hidden"></div>
 
-    </div>
+</div>
+</div>
 
     {{ vite('resources/js/exam-reports-plots')|raw }}
 

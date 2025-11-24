@@ -28,7 +28,7 @@ class TopicController extends Controller
         $rows = $topics->map(function ($topic) {
             return [
                 'id' => $topic->id,
-                'subject' => $topic->subject->name,
+                'subject' => $topic->subject->code,
                 'name' => $topic->name,
                 'question count' => $topic->questions->count()
             ];
@@ -41,7 +41,7 @@ class TopicController extends Controller
             'url' => 'topics'
         ];
 
-        if (request()->hasHeader('HX-Request')) {
+        if (request()->hasHeader('HX-Request') && !request()->hasHeader('HX-History-Restore-Request')) {
             // Return only the partial view for HTMX
             return view('components/core/index-table', $data);
         }
@@ -73,7 +73,7 @@ class TopicController extends Controller
             'questions_are_in_exams' => $questions_are_in_exams
         ];
 
-        if (request()->hasHeader('HX-Request')) {
+        if (request()->hasHeader('HX-Request') && !request()->hasHeader('HX-History-Restore-Request')) {
             // Return only the partial view for HTMX
             return view('components/core/index-table', $data);
         }
@@ -87,8 +87,9 @@ class TopicController extends Controller
     }
 
     public function store(){
+        $subject_id = request()->input('subject');
         $validator = Validator::make(request()->post(), [
-            'name'    => ['required', 'unique:topics,name'],
+            'name'    => ['required', 'unique:topics,name,NULL,id,subject_id,' . $subject_id],
             'subject' => ['required', 'integer', 'exists:subjects,id'],
         ]);
 
@@ -132,19 +133,22 @@ class TopicController extends Controller
     }
 
 
-    public function update(Topic $topic){
+    public function update(Request $request, Topic $topic){
         $this->authorize('update', $topic);
 
 
-        request()->validate([
-            'name'    => ['required', Rule::unique('topics', 'name')->ignore($topic->id)],
-            'subject'     => ['required', 'integer'],
-        ]);
+        $request->validate([
+                'name' => [
+                    'required',
+                    Rule::unique('topics')->where(function ($query) use ($request) {
+                        return $query->where('subject_id', $request->subject);
+                    })->ignore($topic->id),
+                ],
+                'subject' => ['required', 'integer', 'exists:subjects,id'],
+            ]);
 
-        $topic->update([
-            'name' => request('name'),
-            'subject_id' => request('subject'),
-        ]);
+
+        $topic->update($request->all());
     
         session()->flash('toast', json_encode([
             'status' => 'Updated!',

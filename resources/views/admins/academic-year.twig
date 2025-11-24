@@ -1,0 +1,109 @@
+{% from 'components/core/link-card' import link %}
+{% from 'components/core/show-nav-item' import show_nav_item %}
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/index-table' import academic_table %}
+{% from 'components/core/show-header' import show_header %}
+{% import 'components/core/forms' as forms %}
+
+{% extends 'components/core/faculty-layout' %}
+
+{% block content %}
+{{ breadcrumb() }}
+<div class="flex flex-col mx-4">
+    <div class="flex items-center justify-start gap-x-2 mx-4 text-gray-800">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-7">
+            <path fill-rule="evenodd" d="M15.75 1.5a6.75 6.75 0 0 0-6.651 7.906c.067.39-.032.717-.221.906l-6.5 6.499a3 3 0 0 0-.878 2.121v2.818c0 .414.336.75.75.75H6a.75.75 0 0 0 .75-.75v-1.5h1.5A.75.75 0 0 0 9 19.5V18h1.5a.75.75 0 0 0 .53-.22l2.658-2.658c.19-.189.517-.288.906-.22A6.75 6.75 0 1 0 15.75 1.5Zm0 3a.75.75 0 0 0 0 1.5A2.25 2.25 0 0 1 18 8.25a.75.75 0 0 0 1.5 0 3.75 3.75 0 0 0-3.75-3.75Z" clip-rule="evenodd" />
+        </svg>
+        <h1 class="font-bold text-4xl">Access Control</h1>
+    </div>
+</div>
+
+<div class="flex flex-1 flex-col gap-y-4">
+    <div class="flex max-w-full gap-x-4 overflow-x-auto mx-auto rounded-xl bg-white p-2 shadow-sm ring-1 ring-gray-950/5 ">
+        {{ show_nav_item('/admins/users', 
+                        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                            <path d="M4.5 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM14.25 8.625a3.375 3.375 0 1 1 6.75 0 3.375 3.375 0 0 1-6.75 0ZM1.5 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM17.25 19.128l-.001.144a2.25 2.25 0 0 1-.233.96 10.088 10.088 0 0 0 5.06-1.01.75.75 0 0 0 .42-.643 4.875 4.875 0 0 0-6.957-4.611 8.586 8.586 0 0 1 1.71 5.157v.003Z" />
+                          </svg>',
+                        'Users')
+                     }}
+        {{ show_nav_item('/admins/roles', 
+                        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                            <path fill-rule="evenodd" d="M12.516 2.17a.75.75 0 0 0-1.032 0 11.209 11.209 0 0 1-7.877 3.08.75.75 0 0 0-.722.515A12.74 12.74 0 0 0 2.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 0 0 .374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 0 0-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08Zm3.094 8.016a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
+                          </svg>',
+                        'Roles') }}
+        {{ show_nav_item('/admins/academic-year', 
+                        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                         <path d="M12 11.993a.75.75 0 0 0-.75.75v.006c0 .414.336.75.75.75h.006a.75.75 0 0 0 .75-.75v-.006a.75.75 0 0 0-.75-.75H12ZM12 16.494a.75.75 0 0 0-.75.75v.005c0 .414.335.75.75.75h.005a.75.75 0 0 0 .75-.75v-.005a.75.75 0 0 0-.75-.75H12ZM8.999 17.244a.75.75 0 0 1 .75-.75h.006a.75.75 0 0 1 .75.75v.006a.75.75 0 0 1-.75.75h-.006a.75.75 0 0 1-.75-.75v-.006ZM7.499 16.494a.75.75 0 0 0-.75.75v.005c0 .414.336.75.75.75h.005a.75.75 0 0 0 .75-.75v-.005a.75.75 0 0 0-.75-.75H7.5ZM13.499 14.997a.75.75 0 0 1 .75-.75h.006a.75.75 0 0 1 .75.75v.005a.75.75 0 0 1-.75.75h-.006a.75.75 0 0 1-.75-.75v-.005ZM14.25 16.494a.75.75 0 0 0-.75.75v.006c0 .414.335.75.75.75h.005a.75.75 0 0 0 .75-.75v-.006a.75.75 0 0 0-.75-.75h-.005ZM15.75 14.995a.75.75 0 0 1 .75-.75h.005a.75.75 0 0 1 .75.75v.006a.75.75 0 0 1-.75.75H16.5a.75.75 0 0 1-.75-.75v-.006ZM13.498 12.743a.75.75 0 0 1 .75-.75h2.25a.75.75 0 1 1 0 1.5h-2.25a.75.75 0 0 1-.75-.75ZM6.748 14.993a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75Z" />
+                         <path fill-rule="evenodd" d="M18 2.993a.75.75 0 0 0-1.5 0v1.5h-9V2.994a.75.75 0 1 0-1.5 0v1.497h-.752a3 3 0 0 0-3 3v11.252a3 3 0 0 0 3 3h13.5a3 3 0 0 0 3-3V7.492a3 3 0 0 0-3-3H18V2.993ZM3.748 18.743v-7.5a1.5 1.5 0 0 1 1.5-1.5h13.5a1.5 1.5 0 0 1 1.5 1.5v7.5a1.5 1.5 0 0 1-1.5 1.5h-13.5a1.5 1.5 0 0 1-1.5-1.5Z" clip-rule="evenodd" />
+                         </svg>',
+                        'Academic Year') }}
+    </div>
+
+    <div id="access-control-content" class="flex justify-between mx-16">
+        <div class="flex flex-col max-h-fit min-w-[30%] gap-y-2 overflow-x-auto rounded-xl bg-white px-8 py-4 shadow-sm ring-1 ring-gray-950/5 ">
+            <div class="flex gap-x-2 justify-center items-center">
+                <span class="relative flex w-5 h-5">
+                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full {{ current_academic_year ? 'bg-blue-900 ring-gray-300': 'bg-red-600 ring-gray-200'}} opacity-75 ring-2 " style="animation-duration: 2s;"></span>
+                    <span class="relative inline-flex w-5 h-5 rounded-full {{ current_academic_year ? 'bg-blue-900 ring-gray-300': 'bg-red-600 ring-gray-200'}} shadow-md ring-2  z-10"></span>
+                </span>
+
+                <h1 class="text-3xl font-semibold mb-0.5 {{ current_academic_year ? 'text-gray-900': 'text-red-600'}}">
+                    {{ current_academic_year.year_label ?: 'MAINTENANCE'}}
+                </h1>
+            </div>
+            <div class="flex flex-col gap-y-1 justify-center items-center text-gray-800">
+                <p class="flex gap-x-1 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5 text-green-600">
+                    <path fill-rule="evenodd" d="M17 4.25A2.25 2.25 0 0 0 14.75 2h-5.5A2.25 2.25 0 0 0 7 4.25v2a.75.75 0 0 0 1.5 0v-2a.75.75 0 0 1 .75-.75h5.5a.75.75 0 0 1 .75.75v11.5a.75.75 0 0 1-.75.75h-5.5a.75.75 0 0 1-.75-.75v-2a.75.75 0 0 0-1.5 0v2A2.25 2.25 0 0 0 9.25 18h5.5A2.25 2.25 0 0 0 17 15.75V4.25Z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M1 10a.75.75 0 0 1 .75-.75h9.546l-1.048-.943a.75.75 0 1 1 1.004-1.114l2.5 2.25a.75.75 0 0 1 0 1.114l-2.5 2.25a.75.75 0 1 1-1.004-1.114l1.048-.943H1.75A.75.75 0 0 1 1 10Z" clip-rule="evenodd" />
+                    </svg>
+                    <span>
+                        {{ current_academic_year ? current_academic_year.start_date|date('M d Y') }}
+                    </span>
+                </p>
+                <p class="flex gap-x-1 items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5 text-orange-600">
+                    <path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 0 1 5.25 2h5.5A2.25 2.25 0 0 1 13 4.25v2a.75.75 0 0 1-1.5 0v-2a.75.75 0 0 0-.75-.75h-5.5a.75.75 0 0 0-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 0 0 .75-.75v-2a.75.75 0 0 1 1.5 0v2A2.25 2.25 0 0 1 10.75 18h-5.5A2.25 2.25 0 0 1 3 15.75V4.25Z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M19 10a.75.75 0 0 0-.75-.75H8.704l1.048-.943a.75.75 0 1 0-1.004-1.114l-2.5 2.25a.75.75 0 0 0 0 1.114l2.5 2.25a.75.75 0 1 0 1.004-1.114l-1.048-.943h9.546A.75.75 0 0 0 19 10Z" clip-rule="evenodd" />
+                    </svg>
+                    <span>                    
+                        {{ current_academic_year ? current_academic_year.end_date|date('M d Y') }}
+                    </span>
+                </p>
+            </div>
+        </div>
+        <div id="pagination-div" class="w-full max-w-[70%] ml-4" >
+            <div class="flex w-full p-4 bg-white border-x border-t border-gray-300 rounded-t-2xl">
+                <button type="button" 
+                        hx-get="{{ route('admin.academic-year.create') }}"
+                        hx-trigger="click"
+                        hx-target="#academic-year-form"
+                        hx-swap="outerHTML"
+                        popovertarget="create-academic-year-popover"
+                        class=" ml-auto flex gap-1 bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg p-2 font-semibold"
+                        >
+
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                    <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clip-rule="evenodd" />
+                    </svg> 
+                    Academic Year
+                </button>
+            </div>
+            <div class="overflow-auto max-w-full scroll-smooth border-x border-t border-gray-300">
+                {{ academic_table(header, rows, url:url) }}
+
+            </div>
+            <div class="w-full h-16 p-8 bg-white border-x border-b border-gray-300 rounded-b-2xl">
+            </div>
+        </div>
+    </div>
+
+</div>
+<div popover="manual"
+    class="backdrop:bg-gray-900/25 m-auto rounded-xl w-96" 
+    id="create-academic-year-popover"
+    >
+    <form id="academic-year-form"></form>
+</div>
+
+{% endblock %}

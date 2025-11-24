@@ -33,5 +33,6 @@ export default defineConfig({
     ],
     optimizeDeps: {
     include: ['plotly.js-dist-min']
-    }
+    },
+    host: true,
 });

@@ -1,0 +1,89 @@
+---
+name: Push and Publish to DockerHub PE-PROJECT to Staging area
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*.*.*"
+  pull_request:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            coooal/pcu-dasma-pe-project-app
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+            stage: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Debug workspace
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -R docker/common/php-fpm
+
+      - name: Build and push laravel php-cli image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ github.workspace }}
+          file: ${{ github.workspace }}/docker/php-cli/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+                coooal/pcu-dasma-pe-project-php-cli:staging
+                ${{ github.ref == 'refs/heads/main' && 'coooal/pcu-dasma-pe-project-php-cli:latest' || '' }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push laravel web nginx image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ github.workspace }}
+          file: ${{ github.workspace }}/docker/production/nginx/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+                coooal/pcu-dasma-pe-project-web:staging
+                ${{ github.ref == 'refs/heads/main' && 'coooal/pcu-dasma-pe-project-web:latest' || '' }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push laravel php-fpm image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ github.workspace }}
+          file: ${{ github.workspace }}/docker/common/php-fpm/Dockerfile
+          target: production
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

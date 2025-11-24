@@ -16,6 +16,7 @@ class UserService
             ->get();
     }
 
+
     public function getCourseById($courseId)
     {
         return Course::with('subjects')

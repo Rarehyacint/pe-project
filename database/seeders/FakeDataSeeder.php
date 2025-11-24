@@ -45,6 +45,7 @@ class FakeDataSeeder extends Seeder
 
             $subject = Subject::firstOrCreate([
                 'name' => $subject_data['name'],
+                'code' => $subject_data['code'],
                 'year_level' => $subject_data['year_level'],
                 'created_at' => Carbon::now()
             ]);

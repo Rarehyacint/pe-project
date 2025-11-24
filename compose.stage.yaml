@@ -1,0 +1,178 @@
+services:
+  web:
+    image: coooal/pcu-dasma-pe-project-web:staging
+    restart: unless-stopped # Automatically restart unless the service is explicitly stopped
+    volumes:
+      # Mount the 'laravel-storage' volume to '/var/www/storage' inside the container.
+      # -----------------------------------------------------------
+      # This volume stores persistent data like uploaded files and cache.
+      # The ':ro' option mounts it as read-only in the 'web' service because Nginx only needs to read these files.
+      # The 'php-fpm' service mounts the same volume without ':ro' to allow write operations.
+      # -----------------------------------------------------------
+      - laravel-storage-staging:/var/www/storage:ro
+      - laravel-public-assets:/var/www/public/build:ro
+    networks:
+      - laravel-staging
+    ports:
+      # Map port 80 inside the container to the port specified by 'NGINX_PORT' on the host machine.
+      # -----------------------------------------------------------
+      # This allows external access to the Nginx web server running inside the container.
+      # For example, if 'NGINX_PORT' is set to '8080', accessing 'http://localhost:8080' will reach the application.
+      # -----------------------------------------------------------
+      - "8000:80"
+    depends_on:
+      php-fpm:
+        condition: service_healthy # Wait for php-fpm health check
+
+  php-fpm:
+    # For the php-fpm service, we will create a custom image to install the necessary PHP extensions and setup proper permissions.
+    image: coooal/pcu-dasma-pe-project-app:local-staging
+    build:
+      context: .
+      dockerfile: ./docker/common/php-fpm/Dockerfile
+      target: production # Use the 'production' stage in the Dockerfile
+    restart: unless-stopped
+    volumes:
+      - laravel-public-assets:/var/www/public/build
+      - laravel-storage-staging:/var/www/storage # Mount the storage volume
+    env_file:
+      - .env.staging
+    networks:
+      - laravel-staging
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm-healthcheck || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    # The 'depends_on' attribute with 'condition: service_healthy' ensures that
+    # this service will not start until the 'postgres' service passes its health check.
+    # This prevents the application from trying to connect to the database before it's ready.
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # The 'php-cli' service provides a command-line interface for running Artisan commands and other CLI tasks.
+  # -----------------------------------------------------------
+  # This is useful for running migrations, seeders, or any custom scripts.
+  # It shares the same codebase and environment as the 'php-fpm' service.
+  # -----------------------------------------------------------
+  php-cli:
+    image: coooal/pcu-dasma-pe-project-php-cli:staging
+    tty: true # Enables an interactive terminal
+    stdin_open: true # Keeps standard input open for 'docker exec'
+    env_file:
+      - .env.staging
+    networks:
+      - laravel-staging
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker:
+    image: coooal/pcu-dasma-pe-project-php-cli:staging
+    env_file:
+      - .env.staging
+    command: php artisan queue:work --sleep=3 --tries=3
+    restart: unless-stopped
+    volumes:
+      - laravel-storage-staging:/var/www/storage
+    networks:
+      - laravel-staging
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    user: postgres
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres-data-staging:/var/lib/postgresql/data
+    networks:
+      - laravel-staging
+    # Health check for PostgreSQL
+    # -----------------------------------------------------------
+    # Health checks allow Docker to determine if a service is operational.
+    # The 'pg_isready' command checks if PostgreSQL is ready to accept connections.
+    # This prevents dependent services from starting before the database is ready.
+    # -----------------------------------------------------------
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped # Automatically restart unless the service is explicitly stopped
+    networks:
+      - laravel-staging
+    volumes:
+      - redis_staging_data:/data
+    # Health check for Redis
+    # -----------------------------------------------------------
+    # Checks if Redis is responding to the 'PING' command.
+    # This ensures that the service is not only running but also operational.
+    # -----------------------------------------------------------
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  java-api:
+    image: coooal/pcu-dasma-pe-project-java-api:main
+    ports:
+      - "${JAVA_API_PORT}:8090"
+    networks:
+      - laravel-staging
+    cap_drop: 
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: '0.50'
+    stop_grace_period: 15s 
+    stop_signal: SIGKILL 
+
+  fastapi:
+    image: coooal/pcu-dasma-pe-project-fastapi:main
+    ports:
+      - "${FASTAPI_PORT}:8080"
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - laravel-staging
+    environment:
+      - REDIS_HOST=redis
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+
+networks:
+  # Attach the service to the 'laravel-staging' network.
+  # -----------------------------------------------------------
+  # This custom network allows all services within it to communicate using their service names as hostnames.
+  # For example, 'php-fpm' can connect to 'postgres' by using 'postgres' as the hostname.
+  # -----------------------------------------------------------
+  laravel-staging:
+
+volumes:
+  postgres-data-staging:
+  laravel-storage-staging:
+  redis_staging_data:
+  laravel-public-assets:

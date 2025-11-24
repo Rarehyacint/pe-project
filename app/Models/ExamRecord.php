@@ -24,10 +24,21 @@ class ExamRecord extends Model
 
 
     public function studentPaper(){
-        return $this->belongsTo(StudentPaper::class);
+        return $this->belongsTo(StudentPaper::class, 'student_paper_id');
     }
 
     public function subjects(){
         return $this->hasMany(ExamRecordsSubject::class, 'exam_record_id');
+    }
+    
+
+    public function exam()
+    {
+        return $this->hasOneThrough(Exam::class, StudentPaper::class, 'id', 'id', 'student_paper_id', 'exam_id');
+    }
+
+    public function user()
+    {
+        return $this->hasOneThrough(User::class, StudentPaper::class, 'id', 'id', 'student_paper_id', 'user_id');
     }
 }

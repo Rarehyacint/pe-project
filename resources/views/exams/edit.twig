@@ -20,7 +20,6 @@
     </div>
     
 </div>
-
 <div class="flex flex-1 flex-col gap-y-4">
     <div class="flex max-w-full gap-x-4 overflow-x-auto mx-auto rounded-xl bg-white p-2 shadow-sm ring-1 ring-gray-950/5 ">
         {{ show_nav_item('/exams/'~exam.id, 
@@ -44,7 +43,7 @@
     </div>
     
     <div class="flex flex-1 flex-col mx-16">
-        <form action="{{ route('exams.update', { exam:exam } ) }}" method="POST" class="flex flex-col gap-y-4">
+        <form id="exam-form"  action="{{ route('exams.update', { exam:exam } ) }}" method="POST" class="flex flex-col gap-y-4">
             {{ csrf_field() }}
             {{ method_field('PATCH') }}
             <div class="flex max-w-full rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5">
@@ -69,17 +68,34 @@
                                 errors:errors.get('name'),
                                 isColumn:true 
                             )}}
-                            <div id="tags-container" class="flex flex-wrap gap-1 p-1 ">
-                                <span class="whitespace-nowrap text-sm/6 font-medium text-gray-900 ">
-                                    Course/s :
-                                </span> 
-                                {% for course in exam.courses %}
-                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-900 rounded-full font-semibold text-xs select-none">
-                                    {{ course.abbreviation }}
-                                </span>
-                                {% endfor %}
+                            <div class="flex gap-1">
+                                <div class="relative inline-block shrink-0">
+                                    <button 
+                                        id="toggle-course-list" 
+                                        type="button"
+                                        class="px-2 py-1 mt-1 bg-blue-900 text-sm text-gray-50 rounded-md cursor-pointer hover:bg-blue-700 transition"
+                                    >
+                                        + Course
+                                    </button>
+                                    <div 
+                                        id="course-list" 
+                                        class="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-50 hidden"
+                                    >
+                                        <ul class="text-sm max-h-56 overflow-auto text-gray-700">
+                                        {% for course in available_courses %}
+                                        <li><button type="button" class="course-btn w-full text-left px-4 py-2 hover:bg-blue-100" data-tag-abbv="{{ course.abbreviation }}" data-tag-id="{{ course.id }}">{{ course.abbreviation }}</button></li>
+                                        {% endfor %}
+                                        </ul>
+                                    </div>
+                                    </div>
+                                <div id="tags-container" data-exam-courses="{{ exam.courses|json_encode|e('html_attr') }}" class="flex flex-wrap gap-1 p-1 "></div>
+                                <input type="hidden" name="courses[]" id="courses-id" />
                             </div>
-                            <span class="text-gray-500 font-semibold text-xs italic">For Data Integrity Purposes, Course/s cannot be changed.</span>
+                                {% if errors.has('courses') %}
+                                    <span class="add-tag-animation text-red-500 text-sm font-semibold whitespace-nowrap">
+                                        {{ errors.first('courses') }} 
+                                    </span>    
+                                {% endif %}
                         </div>
                         <div class="flex flex-1/2 flex-col gap-y-4 w-full">
                             {{ forms.form_field(
@@ -224,5 +240,112 @@
         </form>
     </div>
 </div>
+<script>
+    const container = document.getElementById("tags-container");
+    const tagsHiddenInput = document.getElementById('courses-id');
+    const exam_courses = JSON.parse(container.dataset.examCourses);
+    const tags = new Set();  
 
+    const toggle_course = document.getElementById("toggle-course-list");
+    const course_list = document.getElementById("course-list");
+
+    toggle_course.addEventListener("click", () => {
+        course_list.classList.toggle("hidden");
+    });
+
+    exam_courses.forEach(course => {
+        const tag = course.abbreviation;
+        const tag_id = String(course.id);
+            
+        if (tag && tag_id && !tags.has(tag_id)) {
+            addTag(tag, tag_id);
+            tags.add(tag_id);
+        }
+    });
+
+    updateHiddenInput(); 
+
+    document.addEventListener("click", (e) => {
+        if (!toggle_course.contains(e.target) && !course_list.contains(e.target)) {
+        course_list.classList.add("hidden");
+        }
+    });
+
+    // Handle course selection
+    const course_buttons = document.querySelectorAll(".course-btn");
+
+    course_buttons.forEach(button => {
+        button.addEventListener("click", () => {
+        const tag = button.dataset.tagAbbv;
+        const tag_id = button.dataset.tagId;
+            if (tag && tag_id && !tags.has(tag_id)) {
+                addTag(tag, tag_id);
+                tags.add(tag_id);
+                updateHiddenInput();
+                course_list.classList.add("hidden");
+            }
+        });
+    });
+
+    function addTag(tag, tag_id) {
+        const tag_element = document.createElement("span");
+        tag_element.className = `
+        inline-flex 
+        items-center 
+        gap-1 
+        px-2 py-1 
+        bg-blue-100 
+        text-blue-900 
+        rounded-full 
+        font-semibold 
+        text-xs 
+        select-none
+        add-tag-animation
+        `;
+        tag_element.textContent = tag;
+        tag_element.dataset.tagId = tag_id;
+
+        const tag_close_button = document.createElement("button");
+        tag_close_button.innerHTML = "&times;";
+        tag_close_button.type = "button"; 
+        tag_close_button.className = `
+        text-blue-900 
+        text-sm 
+        font-bold 
+        cursor-pointer 
+        bg-transparent 
+        border-none
+        `;
+
+        tag_close_button.addEventListener("click", () => {
+            tag_element.classList.add("delete-tag-animation");
+            
+            tag_element.addEventListener("animationend",  function handleAnimationEnd() {
+                tag_element.remove(); 
+                tags.delete(tag_id);
+                updateHiddenInput();
+                tag_element.removeEventListener("animationend", handleAnimationEnd);
+            });
+        });
+
+        tag_element.appendChild(tag_close_button);
+        container.appendChild(tag_element);
+    }
+
+    function updateHiddenInput() {
+        const form = document.getElementById("exam-form");
+        if (!form) return; 
+
+        form.querySelectorAll('input[name="courses[]"]').forEach(el => el.remove());
+                
+        Array.from(tags).forEach(tag_id => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "courses[]";
+            input.value = tag_id;
+            
+            form.appendChild(input); 
+        });
+    } 
+</script>
 {% endblock %}

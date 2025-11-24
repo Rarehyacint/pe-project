@@ -248,6 +248,7 @@
                                 isColumn:true
                             )}}
                         </div>
+                        {% if question_type_data.choices.enable_compilation %}
                         <div id="loader" class="htmx-indicator m-auto transition-opacity duration-500 opacity-0 pointer-events-none">
                             <img class="mr-10" width="50" src="{{ asset('images/bars-scale.svg') }}"/>
                         </div>
@@ -262,6 +263,7 @@
 
                                     Check Syntax
                             </button>
+                        {% endif %}
                     </div>
 
                     <div id="validate-div"></div>
@@ -276,33 +278,34 @@
                             <div id="initial-solution-div" class="flex-1 h-[29rem]  overflow-y-auto text-gray-500 border-1 border-gray-500"></div>
                         </div>
                         </div>
-
-                        <div class="flex flex-1 flex-col rounded-md">
-                            <div class="flex w-full bg-gray-800 p-2 justify-between rounded-t-md">
-                                <p class="bg-gray-800 text-gray-50 font-semibold p-4 text-sm">Sample Test Case</p>
-                            </div>         
-                            <div class="flex">
-                                <div id="test-case-div" class="flex-1 min-h-48 max-h-48 overflow-y-auto text-gray-500 border-1 border-gray-500"></div>
+                            <div class="flex flex-1 flex-col rounded-md {{ question_type_data.choices.is_syntax_code_only ? 'hidden'}}">
+                                <div class="flex w-full bg-gray-800 p-2 justify-between rounded-t-md">
+                                    <p class="bg-gray-800 text-gray-50 font-semibold p-4 text-sm">Sample Test Case</p>
+                                </div>         
+                                <div class="flex">
+                                    <div id="test-case-div" class="flex-1 min-h-48 max-h-48 overflow-y-auto text-gray-500 border-1 border-gray-500"></div>
+                                </div>
                             </div>
-                        </div>
                     </div>       
                 </div>
             </div>
         </div>  
-        <form   id="test-student-code-form"
-        class="hidden"
-        hx-post="{{ route('validate.coding.question') }}"
-        hx-target="#validate-div"
-        hx-swap="outerHTML"
-        hx-indicator="#loader"
-        hx-select-oob="#debug-popover-div"
-        
-        onsubmit="testStudentCode()">
-        {{ csrf_field() }}
-        <!-- Settings -->
-        <input type="number" class="hidden" value="{{ question.id }}" name="test_coding_question_id" id="test-coding-question-input">
-        <textarea class="hidden" name="student-code-test" id="student-code-test-input" ></textarea>
-        <input type="text" class="hidden" name="language-to-validate" id="language-to-validate-input">
-</form>
+        {% if question_type_data.choices.enable_compilation %}
+            <form   id="test-student-code-form"
+                class="hidden"
+                hx-post="{{ route('validate.coding.question') }}"
+                hx-target="#validate-div"
+                hx-swap="outerHTML"
+                hx-indicator="#loader"
+                hx-select-oob="#debug-popover-div"
+                
+                onsubmit="testStudentCode()">
+                {{ csrf_field() }}
+                <!-- Settings -->
+                <input type="number" class="hidden" value="{{ question.id }}" name="test_coding_question_id" id="test-coding-question-input">
+                <textarea class="hidden" name="student-code-test" id="student-code-test-input" ></textarea>
+                <input type="text" class="hidden" name="language-to-validate" id="language-to-validate-input">
+            </form>
+        {% endif %}
 </div>
 {% endif %}

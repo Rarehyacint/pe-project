@@ -118,6 +118,50 @@ services:
     networks:
       - laravel-development
 
+  worker:
+    image: laravel-workspace:dev
+    build:
+      context: .
+      dockerfile: ./docker/development/workspace/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    pull_policy: never
+    env_file:
+      - .env
+    command: php artisan queue:work --sleep=3 --tries=3
+    restart: unless-stopped
+    volumes:
+      - ./app:/var/www/app
+      - ./bootstrap:/var/www/bootstrap
+      - ./routes:/var/www/routes
+      - ./config:/var/www/config
+      - ./resources:/var/www/resources
+      - ./public:/var/www/public
+      - ./database:/var/www/database
+      - ./compose.dev.yaml:/var/www/compose.dev.yaml
+      - ./compose.prod.yaml:/var/www/compose.prod.yaml
+      - ./docker:/var/www/docker
+      - ./composer.json:/var/www/composer.json
+      - ./composer.lock:/var/www/composer.lock
+      - ./package-lock.json:/var/www/package-lock.json
+      - ./package.json:/var/www/package.json
+      - ./vite.config.js:/var/www/vite.config.js
+      - ./.env.example:/var/www/.env.example
+      - ./.dockerignore:/var/www/.dockerignore
+      - ./.editorconfig:/var/www/.editorconfig
+      - ./artisan:/var/www/artisan
+      - ./vendor:/var/www/vendor
+      - app-node-modules:/var/www/node_modules
+      - ./storage:/var/www/storage
+    networks:
+      - laravel-development
+    depends_on:
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+
   postgres:
     image: postgres:16
     ports:
@@ -135,27 +179,38 @@ services:
     image: redis:alpine
     ports:
       - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_dev_data:/data
     networks:
       - laravel-development
 
   java-api:
-    build:
-      context: ./java-api
+    image: coooal/pcu-dasma-pe-project-java-api:main
     ports:
-      - "8082:8090"
+      - "8085:8090"
     networks:
       - laravel-development
+    cap_drop: 
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: '0.50'
+    stop_grace_period: 15s 
+    stop_signal: SIGKILL 
 
   fastapi:
-    build:
-      context: ./fastapi
+    image: coooal/pcu-dasma-pe-project-fastapi:main
+    command: sh -c "ln -sf /code /code/app 2>/dev/null || true && uvicorn main:app --host 0.0.0.0 --port 80"
+    working_dir: /code
     ports:
-      - "8085:80"
+      - "8082:8080"
     depends_on:
       - redis
       - postgres
-    volumes:
-      - /home/echo/PythonSSE:/code/app
     networks:
       - laravel-development
     environment:
@@ -163,8 +218,8 @@ services:
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=postgres
-      - DB_PORT=5432
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
 
 networks:
   laravel-development:
@@ -172,3 +227,4 @@ networks:
 volumes:
   postgres-data-development:
   app-node-modules:
+  redis_dev_data:

@@ -62,8 +62,8 @@
             </div>
 
             {{ show_item('Max Score', exam.max_score)}}
-            {{ show_item('Duration', exam.duration ?? '∞')}}
-            {{ show_item('Attempts Left', attempts_left ?? '∞', value_attributes: attempts_left == 0 ? 'text-red-600 font-semibold' : '') }}
+            {{ show_item('Duration', exam.duration ~ " min" ?? '∞')}}
+            {{ show_item('Attempts Left', exam.retake == null ? '∞', value_attributes: attempts_left == 0 ? 'text-red-600 font-semibold' : '') }}
             {{ show_item('Examination Date', exam.examination_date is null ? 'Anytime' : exam.examination_date|date('h:i A d M Y')) }}
             {{ show_item('Expiration Date', exam.expiration_date is null ? 'No Expiration' : exam.expiration_date|date('h:i A d M Y')) }}
         </div> 

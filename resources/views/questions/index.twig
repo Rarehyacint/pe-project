@@ -6,14 +6,21 @@
 
 {{ breadcrumb() }}
 <div class="flex justify-between items-center mx-4 pr-4">
-    <div class="flex items-center justify-start gap-x-2 mx-4">
+    <div class="flex items-center justify-start gap-x-2 mx-4 text-gray-800">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-9">
             <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm11.378-3.917c-.89-.777-2.366-.777-3.255 0a.75.75 0 0 1-.988-1.129c1.454-1.272 3.776-1.272 5.23 0 1.513 1.324 1.513 3.518 0 4.842a3.75 3.75 0 0 1-.837.552c-.676.328-1.028.774-1.028 1.152v.75a.75.75 0 0 1-1.5 0v-.75c0-1.279 1.06-2.107 1.875-2.502.182-.088.351-.199.503-.331.83-.727.83-1.857 0-2.584ZM12 18a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
         </svg>
         <h1 class="font-bold text-4xl">Question Bank</h1>
     </div>
-    <a href="{{ route('questions.create') }}" class="bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg p-2 font-semibold">Create Question</a>
-</div>
+    {% if can('create questions') %}
+        <a href="{{ route('questions.create') }}" class="flex items-center gap-1 bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg p-2 font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clip-rule="evenodd" />
+            </svg>  
+            Question
+        </a>
+    {% endif %}
+    </div>
 <div id="pagination-div" class="mx-4 p-4">
     <div class="flex justify-end items-center w-full h-16 p-8 bg-white border-x border-t border-gray-300 rounded-t-2xl">
         <h1>Filter here</h1>

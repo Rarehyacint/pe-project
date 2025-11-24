@@ -9,6 +9,8 @@ class CodingQuestion extends Model
     protected $fillable = [
         'question_id',
         'instruction',
+        'is_syntax_code_only',
+        'enable_compilation',
         'syntax_points',
         'runtime_points',
         'test_case_points',

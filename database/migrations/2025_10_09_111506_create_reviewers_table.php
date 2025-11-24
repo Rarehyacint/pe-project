@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('academic_years', function (Blueprint $table) {
+        Schema::create('reviewers', function (Blueprint $table) {
             $table->id();
-            $table->string('year_label', 9)->unique();
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->boolean('is_current')->default(false);
+            $table->string('name');           // Subject (Math, Physics, etc.)
+            $table->bigInteger('topic');            // Topic ID
+            $table->string('author');          // Professor name
+            $table->string('path');            // Filename of PDF
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('academic_years');
+        Schema::dropIfExists('reviewers');
     }
 };

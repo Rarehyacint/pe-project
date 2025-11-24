@@ -12,6 +12,14 @@ if [ ! "$(ls -A /var/www/storage)" ]; then
   chown -R www-data:www-data /var/www/storage
 fi
 
+mkdir -p /var/www/storage/logs \
+         /var/www/storage/framework/cache \
+         /var/www/storage/framework/sessions \
+         /var/www/storage/framework/views
+
+# Fix ownership
+chown -R www-data:www-data /var/www/storage
+
 # Remove storage-init directory
 rm -rf /var/www/storage-init
 

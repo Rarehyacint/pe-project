@@ -4,14 +4,11 @@
 {% from 'components/core/show-header' import show_header %}
 {% from 'components/core/show-item' import show_item %}
 
-<div class="flex mx-8">
-    <button class="ml-auto p-2 text-md text-blue-900 text-sm font-medium hover:underline cursor-pointer" 
-            hx-get="/admins/load-users" 
-            hx-trigger="click" 
-            hx-swap="innerHTML transition:true"
-            hx-target="#access-control-content">
+<div class="flex justify-end mx-8">
+    <a class="p-2 text-md text-blue-900 text-sm font-medium hover:underline cursor-pointer" 
+            href="{{ app.request.headers.get('referer') }}" >
         Back
-    </button>
+    </a>
 </div>
 <div class="flex flex-1 flex-col mx-8">
     <form method="POST" id="create-form" hx-post="/admins/users" hx-target="#access-control-content" class="flex flex-col gap-y-4" >
@@ -192,8 +189,7 @@
 
         <div class="flex gap-x-2">
             <button type="submit" class="cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm">Create User</button>
-            <button type="button" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-gray-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm">Create User & create another</button>
-            <a href="{{ request.META.HTTP_REFERER }}" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-red-500 hover:border-white hover:text-white duration-300 rounded-lg p-2 font-semibold">Cancel</a>
+            <a href="{{ app.request.headers.get('referer') }}" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-red-500 hover:border-white hover:text-white duration-300 rounded-lg p-2 font-semibold">Cancel</a>
         </div>
     </form>
 </div>

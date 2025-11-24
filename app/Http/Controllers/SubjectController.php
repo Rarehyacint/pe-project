@@ -24,10 +24,15 @@ class SubjectController extends Controller
     public function index(){
         $subject_courses = $this->userService->getSubjectsForUser(auth()->user())->paginate(10);
         $subject_courses->load('courses');
-        $header = ['Name',  'Year Level'];
+        $header = ['Courses', 'Code', 'Name', 'Year Level'];
         $rows = $subject_courses->map(function ($subject) {
+            $courses_abbreviations = $subject->courses->map(function ($course){
+                return $course->abbreviation;
+            });
             return [
                 'id' => $subject->id,
+                'courses' => $courses_abbreviations,
+                'code' => $subject->code,
                 'name' => $subject->name,
                 'year level' => $subject->year_level
             ];
@@ -40,7 +45,7 @@ class SubjectController extends Controller
             'url' => 'subjects'
         ];
 
-        if (request()->hasHeader('HX-Request')) {
+        if (request()->hasHeader('HX-Request') && !request()->hasHeader('HX-History-Restore-Request')) {
             // Return only the partial view for HTMX
             return view('components/core/index-table', $data);
         }
@@ -70,7 +75,7 @@ class SubjectController extends Controller
             'url' => 'questions'
         ];
 
-        if (request()->hasHeader('HX-Request')) {
+        if (request()->hasHeader('HX-Request') && !request()->hasHeader('HX-History-Restore-Request')) {
             // Return only the partial view for HTMX
             return view('components/core/index-table', $data);
         }
@@ -88,13 +93,14 @@ class SubjectController extends Controller
 
         $validator = Validator::make(request()->post(), [
             'name'    => ['required', 'unique:subjects,name'],
+            'code' => ['required', 'unique:subjects,code'],
             'courses' => 'required|array',
             'courses.*' => 'exists:courses,id',
             'year_level' => ['required', 'integer', 'min:1', 'max:4']
         ]);
 
         if ($validator->fails()) {
-            $courses = Course::select(['abbreviation', 'id'])->get();
+            $courses = $this->userService->getCoursesForUser(auth()->user());
             return response()->view('subjects.create', [
                 'errors' => $validator->errors(),
                 'courses' => $courses,
@@ -102,9 +108,9 @@ class SubjectController extends Controller
         }
 
         $validated = $validator->validate();
-
         $subject = Subject::create([
             'name' => request('name'),
+            'code' => request('code'),
             'year_level' => request('year_level'),
         ]);
 
@@ -133,10 +139,12 @@ class SubjectController extends Controller
     public function update(Subject $subject){
         request()->validate([
             'name'    => ['required', Rule::unique('subjects', 'name')->ignore($subject->id)],
+            'code'    => ['required', Rule::unique('subjects', 'code')->ignore($subject->id)],
             'year_level' => ['required', 'integer', 'min:1', 'max:4']
         ]); 
         $subject->update([
             'name' => request('name'),
+            'code' => request('code'),
             'year_level' => request('year_level'),
         ]);
 

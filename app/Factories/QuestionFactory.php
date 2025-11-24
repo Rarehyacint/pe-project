@@ -30,6 +30,8 @@ class QuestionFactory
             if ($question_data['question_type'] == 'coding'){
                         $coding_question_data = [
                                     'instruction' => $data['instruction'],
+                                    'is_syntax_code_only' => $data['syntax_only_checkbox']  ?? false,
+                                    'enable_compilation' => $data['enable_student_compile']  ?? false,
                                     'syntax_points' => $data['syntax_points'],
                                     'runtime_points' => $data['runtime_points'],
                                     'test_case_points' => $data['test_case_points'],

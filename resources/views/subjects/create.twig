@@ -16,7 +16,8 @@
                                 'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900  after:text-red-500 after:content-[\'\*\']'}
                         ),
                         input:forms.text(
-                            name:'name', 
+                            name:'name',
+                            value: old.name ?: '',   
                             attributes:{
                                 'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
                                 'required': true
@@ -47,7 +48,28 @@
                                 </div>
                             <div id="course-container" class="flex flex-wrap gap-1 p-1 "></div>
                             <input type="hidden" name="courses[]" id="courses-id" />
+                            {% if errors.get('courses.0') or errors.get('courses') %}
+                                <span class="add-tag-animation text-red-500 font-semibold text-sm mt-2">Course required</span>
+                            {% endif %}
                         </div>
+                    {{ forms.form_field(
+                        label:forms.label(
+                            id:'code', 
+                            content:'Code', 
+                            attributes:{
+                                'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900  after:text-red-500 after:content-[\'\*\']'}
+                        ),
+                        input:forms.text(
+                            name:'code',
+                            value: old.code ?: '',  
+                            attributes:{
+                                'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
+                                'required': true
+                            }
+                        ),
+                        errors: errors.get('code'),
+                        isColumn:true 
+                    )}}
                     {{ forms.form_field(
                         label:forms.label(
                             id:'year_level', 
@@ -57,6 +79,7 @@
                             ),
                         input:forms.number(
                             name:'year_level',
+                            value: old.year_level ?: '',  
                             attributes:{
                                 'class':'flex-1 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
                                 'required':true,
@@ -147,6 +170,7 @@
 
     const closeBtn = document.createElement("button");
     closeBtn.innerHTML = "&times;";
+    closeBtn.type = "button"; 
     closeBtn.className = `
       text-blue-900 
       text-sm 
@@ -154,12 +178,17 @@
       cursor-pointer 
       bg-transparent 
       border-none
+      add-tag-animation
     `;
 
     closeBtn.addEventListener("click", () => {
-      container.removeChild(tagEl);
-      tags.delete(tag_id);
-      updateHiddenInput();
+        tagEl.classList.add("delete-tag-animation");
+        
+        tagEl.addEventListener("animationend", () => {
+            container.removeChild(tagEl);
+            tags.delete(tag_id);
+            updateHiddenInput();
+        });
     });
 
     tagEl.appendChild(closeBtn);

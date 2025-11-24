@@ -3,13 +3,12 @@
 {% from 'components/core/show-header' import show_header %}
 {% from 'components/core/show-item' import show_item %}
 
-
 {% extends 'components/core/student-layout' %}
 
 {% block content %}
 <div class="ml-8 mt-4 max-w-fit">
-    <a   href="{{ route('students.index') }}" 
-            class="cursor-pointer text-gray-900 hover:text-blue-900 hover:underline">
+    <a href="{{ route('students.index') }}" 
+        class="cursor-pointer text-gray-900 hover:text-blue-900 hover:underline">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
         <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
         </svg>
@@ -39,13 +38,13 @@
 <div id="exam-content">
     <div class="flex flex-1 flex-col max-w-full gap-y-4 mx-8 bg-white rounded-xl shadow-sm ring-1 ring-gray-950/5">
         <div class="flex flex-1 p-4  bg-blue-900 text-white font-bold text-lg rounded-xl justify-between">
-                Attempt #{{ exam_record.attempt }}
-                <button hx-get="{{ route('exam_records.index', { exam: exam }) }}" 
-                        hx-target="#exam-content"
-                        hx-swap="innerHTML" 
-                        class="font-bold text-2xl text-white cursor-pointer hover:text-blue-300 duration-300 transition">
-                    X
-                </button>
+            Attempt #{{ exam_record.attempt }}
+            <button hx-get="{{ route('exam_records.index', { exam: exam }) }}" 
+                    hx-target="#exam-content"
+                    hx-swap="innerHTML" 
+                    class="font-bold text-2xl text-white cursor-pointer hover:text-blue-300 duration-300 transition">
+                X
+            </button>
         </div>
         <div class="flex p-4 gap-x-4 max-w-full">
             <div class="flex flex-col gap-y-8 w-full">
@@ -100,7 +99,7 @@
                                     <td>{{ row.question }}</td>
                                     <td class="text-xs">{{ row.is_answered ? row.question_type|lower not in ['ranking', 'matching', 'coding'] ? row.your_answer|title : '📝 see details' : 'No answer' }}</td>
                                     <td>{{ row.score }}/{{ row.max_score }}</td>
-                                    <td class="{{ row.question_type|lower == 'coding' and row.is_answer == true ? 'animate-bounce' : '' }}">{{ row.question_type|lower == 'coding' and row.is_answer == true ? '⚪' :row.score == row.max_score ? '🟢' : row.score > 0 and row.max_score != row.score ? '🟡' : '🔴'}}</td>
+                                    <td class="{{ row.question_type|lower == 'coding' and row.is_answered == true ? 'animate-bounce' : '' }}">{{ row.question_type|lower == 'coding' and row.is_answered == true ? '⚪' :row.score == row.max_score ? '🟢' : row.score > 0 and row.max_score != row.score ? '🟡' : '🔴'}}</td>
                                 </tr>
                                 {% if row.question_type|lower  in ['ranking', 'matching', 'coding'] %}
                                 <tr>
@@ -167,12 +166,13 @@
                                                                 <td>Waiting for Result...</td>
                                                                 <td>Waiting for Result...</td>
                                                             </tr>
-                                                            {% endif %}
+                                                            {% else %}
                                                             <tr>
                                                                 <td>No answer</td>
                                                                 <td>No answer</td>
                                                                 <td>No answer</td>
                                                             </tr>
+                                                            {% endif %}
                                                         </tbody> 
                                                     </table>
                                                     {% if row.is_answered %}
@@ -195,88 +195,44 @@
                                 </tr>
                                 {% endif %}
                             {% endfor %}
-                            </tr>
                         </table>
                     </div>
                 </div>
                 <div class="flex flex-col rounded-2xl gap-y-4 text-gray-800">            
                     {{ show_header('Reviewers Recommendation')}}
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-md">
-                        <h3 class="text-lg font-semibold text-gray-800">Reviewer Name</h3>
-                        <p class="text-sm text-gray-600 mb-3">Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...</p>
-                        <a href="#"
-                            download
-                            class="inline-flex items-center text-sm font-medium text-orange-900 hover:underline">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                            <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
-                            <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-                            </svg>
-                            Download this reviewer (PDF)
-                        </a>
-                        <p class="inline-flex font-bold text-gray-300 text-3xl mx-4"> | </p>
-                        <a href="#"
-                            download
-                            class="inline-flex items-center text-sm font-medium text-green-900 hover:underline gap-x-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                            <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
-                            <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
-                            </svg>
-
-                            Email me this reviewer (PDF)
-                        </a>
-                    </div>
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-md">
-                        <h3 class="text-lg font-semibold text-gray-800">Reviewer Name</h3>
-                        <p class="text-sm text-gray-600 mb-3">Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...</p>
-                        <a href="#"
-                            download
-                            class="inline-flex items-center text-sm font-medium text-orange-900 hover:underline">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                            <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
-                            <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-                            </svg>
-                            Download this reviewer (PDF)
-                        </a>
-                        <p class="inline-flex font-bold text-gray-300 text-3xl mx-4"> | </p>
-                        <a href="#"
-                            download
-                            class="inline-flex items-center text-sm font-medium text-green-900 hover:underline gap-x-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                            <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
-                            <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
-                            </svg>
-
-                            Email me this reviewer (PDF)
-                        </a>
-                    </div>
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-md">
-                        <h3 class="text-lg font-semibold text-gray-800">Reviewer Name</h3>
-                        <p class="text-sm text-gray-600 mb-3">Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...Reviewer Description...</p>
-                        <a href="#"
-                            download
-                            class="inline-flex items-center text-sm font-medium text-orange-900 hover:underline">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                            <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
-                            <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-                            </svg>
-                            Download this reviewer (PDF)
-                        </a>
-                        <p class="inline-flex font-bold text-gray-300 text-3xl mx-4"> | </p>
-                        <a href="#"
-                            download
-                            class="inline-flex items-center text-sm font-medium text-green-900 hover:underline gap-x-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                            <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
-                            <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
-                            </svg>
-
-                            Email me this reviewer (PDF)
-                        </a>
-                    </div>
+                    {% if reviewers is defined and reviewers|length > 0 %}
+                        {% for reviewer in reviewers %}
+                        <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-md">
+                            <h3 class="text-lg font-semibold text-gray-800">{{ reviewer.subject_name }}</h3>
+                            <p class="text-sm text-gray-600 mb-3">{{ reviewer.topic_name }}</p>
+                            <a href="/storage/reviewers/{{ reviewer.path }}" 
+                               download
+                               class="inline-flex items-center text-sm font-medium text-orange-900 hover:underline">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                                <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
+                                <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                                </svg>
+                                Download this reviewer (PDF)
+                            </a>
+                            <p class="inline-flex font-bold text-gray-300 text-3xl mx-4"> | </p>
+                            <button
+                                onclick="emailReviewerDirect('{{ reviewer.id }}', '{{ reviewer.path }}', event)"
+                                class="inline-flex items-center text-sm font-medium text-green-900 hover:underline gap-x-1 cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                                <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
+                                <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
+                                </svg>
+                                Email me this reviewer (PDF)
+                            </button>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-md">
+                            <p class="text-gray-600">No reviewers available at the moment.</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-
-
 
             <div class="flex flex-col max-h-fit min-w-fit gap-y-2">
                 <div class="htmx-animate flex flex-col justify-between gap-y-4 rounded-xl bg-gray-10 p-4 shadow-sm ring-1 ring-gray-950/5"
@@ -298,32 +254,19 @@
                             data-exam-max-score = "{{ exam.max_score }}">
                         </div>
                     {% endif %}
-                    {{ show_item('Status', exam_record.status) }}
                     {{ show_item('Time Taken', exam_record.time_taken ~ ' minutes')}}
-                    {{ show_item('Date Taken', exam_record.date_taken|date("m/d/Y"))}}
+                    {{ show_item('Date Taken', exam_record.date_taken|date("M d Y"))}}
                 </div> 
                 {% if exam_record.status != 'in_progress' %}
                 <div class="flex flex-col gap-y-2 w-full">
-                    <a href="#" class="flex p-2 max-h-fit w-full bg-orange-900 rounded-lg font-medium text-white hover:bg-orange-700 hover:text-gray-50 cursor-pointer justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                        <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
-                        <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
-                        </svg>
-                        Download this record
-                    </a>
-                    <a href="#" class="flex p-2 max-h-fit w-full bg-green-900 rounded-lg font-medium text-white hover:bg-green-700 hover:text-gray-50 cursor-pointer justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 mr-1">
-                        <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
-                        <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
-                        </svg>
-                        Email me this record
-                    </a>
+
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
+
 {% if exam_record.status != 'in_progress' %}
 <script>
     function render_score_graph(){
@@ -383,11 +326,4 @@
 </script>
 {% endif %}
 
-<script>
-  document.body.addEventListener('htmx:beforeSwap', function(event) {
-    if (event.detail.xhr.status === 212) {
-      event.preventDefault();
-    }
-  });
-</script>
 {% endblock %}

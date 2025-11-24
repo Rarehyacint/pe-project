@@ -2,19 +2,193 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Exam;
+use App\Models\Report;
+use App\Services\ExamService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use InvalidArgumentException;
 
 class ReportController extends Controller
 {
+    protected $userService;
+    protected $examService;
+
+    public function __construct(UserService $userService, ExamService $examService)
+    {
+        $this->userService = $userService;
+        $this->examService = $examService;
+    }
+
     public function index(){
-        return view('reports/index');
+        $courseIds = $this->userService->getCoursesForUser(auth()->user())->pluck('id');
+        $exams = Exam::with(['courses', 'questions'])
+            ->whereHas('courses', function ($query) use ($courseIds) {
+                $query->whereIn('courses.id', $courseIds);
+            })->get();
+
+        $data = [
+            'exams' => $exams
+        ];
+        return view('reports/index', $data);
 
     }
 
-    public function show(){
-        return view('reports/show');
+    public function index_exam(Exam $exam){
+        $exam->load('courses');
+        $exam->load(['reports' => function ($query) {
+            $query->select(
+                'id', 
+                'exam_id',
+                'course_count', 
+                'subject_count',
+                'topic_count',
+                'question_count',
+                'student_count',
+                'created_at'
+            );
+        }]);
+        $reports = $exam->reports;
+    
+        return view('reports/index_exam', ['exam' => $exam, 'reports' => $reports]);
 
+    }
+
+    public function show(Exam $exam, Report $report){
+        $report_data = $report->report_data;
+        $overview_data = $report_data['exam_overview_data'];
+
+        $exam_name = $exam->name;
+        $created_date = $report->created_at;
+
+        $courses =  $overview_data['courses'];
+        $subject_count = $overview_data['subject_count'];
+        $topic_count = $overview_data['topic_count'];
+        $question_count = $overview_data['question_count'];
+        $student_count = $overview_data['student_count'];
+        $question_levels = $overview_data['questions_levels'];
+
+        $exam_summary_data = $report_data['exam_summary_data'];
+        $question_levels_summary_data = $report_data['question_levels_summary_data'];
+        $subjects_min_max_data = $report_data['subjects_min_max_data'];
+        $exam_histogram_boxplot_data = $report_data['exam_histogram_boxplot_data'];
+        $normalized_exam_scores_by_subjects = $report_data['normalized_exam_scores_by_subjects'];
+        $normalized_exam_scores_by_topics = $report_data['normalized_exam_scores_by_topics'];
+        $exam_by_types_with_levels = $report_data['exam_by_types_with_levels'];
+        $exam_question_heatstrip = $report_data['exam_question_heatstrip'];
+        $data = [
+            'exam' => $exam->id,
+            'report' => $report->id,
+            // metadata
+            'exam_name' => $exam_name,
+            'created_date' => $created_date,
+            'courses' => $courses,
+            'blooms_level_contained' => $question_levels,
+            // data overview
+            'students_count' => $student_count,
+            'subjects_count' => $subject_count,
+            'topics_count' => $topic_count,
+            'questions_count' => $question_count,
+            'max_score_range' => $exam_summary_data['exam_maximum_score'],
+            // descriptive statistics
+            'mean' => $exam_summary_data['mean'],
+            'median' => $exam_summary_data['median'],
+            'mode' => $exam_summary_data['mode'],
+            'max' => $exam_summary_data['max'],
+            'min' => $exam_summary_data['min'],
+            'range' => $exam_summary_data['range'],
+            'std_dev' => $exam_summary_data['standard_deviation'] ?? 0,
+            'question_level_summary' => $question_levels_summary_data,
+            'subjects_three_min' => $subjects_min_max_data['top_three_min_subjects'],
+            'subjects_three_max' => $subjects_min_max_data['top_three_max_subjects'],
+            // Exam Scores
+            'exam_histogram_boxplot_data' => $exam_histogram_boxplot_data,
+            'normalized_exam_scores_by_subjects_data' => $normalized_exam_scores_by_subjects,
+            'normalized_exam_scores_by_topics_data' => $normalized_exam_scores_by_topics,
+            'exam_question_heatstrip_data' => $exam_question_heatstrip,
+            'exam_compare_types_and_blooms_data' =>$exam_by_types_with_levels
+        ];
+
+        return view('reports/show', $data);
+    }
+
+    public function create(Exam $exam){
+        $topics = $this->examService->getTopicsForExam($exam)->count();
+        $subjects = $this->examService->getSubjectsForExam($exam)->count();
+        $questions =  $exam->questions()->count();
+        $enrolled_students = $exam->users()->count();
+        $students_that_took_exam = $exam->takers()->count();
+        $data = [
+            'exam' => $exam,
+            'subjects' => $subjects,
+            'topics' => $topics,
+            'questions' =>$questions,
+            'students' => $enrolled_students,
+            'takers' => $students_that_took_exam
+        ];
+
+        return view('reports/create', $data);
+    }
+
+    public function store(Exam $exam){
+        $response = Http::timeout(30)
+            ->get("http://fastapi:8080/api/reports/create-store/{$exam->id}");
+
+        if (!$response->successful()) {
+
+            session()->flash('toast', json_encode([
+                'status' => 'Error!',
+                'message' => 'Create Report Unsuccessful, CHECK FASTAPI',
+                'type' => 'error'
+            ]));
+
+            return response('', 200)->header('HX-Redirect', route('reports.index_exam', ['exam' => $exam]));
+        }
+
+        $report_data = $response->json('exam_performance');
+        $raw_report_data = $response->json('raw_exam_performance');
+
+        $exam_overview_data = $report_data['exam_overview_data'];
+        $course_count = $exam_overview_data['course_count'];
+        $subject_count = $exam_overview_data['subject_count'];
+        $topic_count = $exam_overview_data['topic_count'];
+        $question_count = $exam_overview_data['question_count'];
+        $student_count = $exam_overview_data['student_count'];
+
+        $report = $exam->reports()->create([
+            'course_count' => $course_count,
+            'subject_count' => $subject_count,
+            'topic_count' => $topic_count,
+            'question_count' => $question_count,
+            'student_count' => $student_count,
+            'report_data' => $report_data,
+            'raw_report_data' =>  $raw_report_data
+        ]);
+
+
+
+        session()->flash('toast', json_encode([
+            'status' => 'Created!',
+            'message' => 'Report for: ' . $exam->name,
+            'type' => 'success'
+        ]));
+
+        return response('', 200)->header('HX-Redirect', route('reports.show', ['exam' => $exam, 'report' => $report]));
+    }
+
+    public function destroy(Exam $exam, Report $report){
+        // $this->authorize('delete', $subject);
+
+        session()->flash('toast', json_encode([
+            'status' => 'Destroyed!',
+            'message' => 'Report for: ' . $report->created_at,
+            'type' => 'warning'
+        ]));
+
+        $report->delete();
+
+        return response('', 200)->header('HX-Redirect', route('reports.index_exam', ['exam' => $exam]));
     }
 
     public function info(){
@@ -260,7 +434,7 @@ class ReportController extends Controller
                 if (array_sum($raw) > 0) {
                     $blooms_data[$bloom] = [
                         'raw' => $raw,
-                        'normalized' => $normalized
+                        'accuracy' => $normalized
                     ];
                 }
             }

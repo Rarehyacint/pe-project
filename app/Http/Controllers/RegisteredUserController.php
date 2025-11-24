@@ -82,7 +82,7 @@ class RegisteredUserController extends Controller
         $user->syncPermissions($user_permissions);
         $user->syncRoles($user_roles);
 
-        return redirect('/admins/load-users');
+        return redirect()->route('admin.users.show', $user);
     }
 
     public function edit(User $user){
@@ -150,7 +150,7 @@ class RegisteredUserController extends Controller
 
         $user->delete();
 
-        return redirect('/admins/load-users');
+        return redirect()->route('admin.users.index');
 
     }
 }

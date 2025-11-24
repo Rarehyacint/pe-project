@@ -46,7 +46,7 @@ class StudentAnswerFactory
                 'points' =>  $update_student_answer['total_points'],
                 'is_answered' => $answer ? true : false,
                 'is_correct' =>  $update_student_answer['is_correct'],
-                'answered_at' => $answer ? now() : null
+                'first_answered_at' => $answer ? now() : null
                 ]);
             });
         } else {

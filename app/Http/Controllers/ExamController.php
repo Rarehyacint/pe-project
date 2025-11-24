@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\Exam;
 use App\Models\ExamAccessCode;
@@ -11,6 +12,7 @@ use App\Services\UserService;
 use App\Events\ExamResultsPublished;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Str;
 
 class ExamController extends Controller
@@ -50,7 +52,7 @@ class ExamController extends Controller
             'url' => 'exams'
         ];
 
-        if (request()->hasHeader('HX-Request')) {
+        if (request()->hasHeader('HX-Request') && !request()->hasHeader('HX-History-Restore-Request')) {
             // Return only the partial view for HTMX
             return view('components/core/index-table', $data);
         }
@@ -66,21 +68,33 @@ class ExamController extends Controller
     }
 
     public function create(){
-        $courses =$this->userService->getCoursesForUser(auth()->user()); 
+        $courses = $this->userService->getCoursesForUser(auth()->user()); 
         return view('exams/create', ['courses' => $courses]);
 
     }
 
     public function store(){
+        if (!AcademicYear::hasCurrent()) {
+
+            session()->flash('toast', json_encode([
+                'status' => 'SYSTEM IS ON MAINTENANCE',
+                'message' => 'Currently no Academic Year is set.',
+                'type' => 'warning'
+            ]));
+
+            return redirect()->route('exams.index');
+        } else {
+            $academic_year_id = AcademicYear::current()->id;
+        }
 
         $validated = request()->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:exams,name',
             'courses' => 'required|array|min:1',
             'courses.*' => 'exists:courses,id|required|string|distinct',
             'max_score' => 'required|integer|gte:1',
             'duration' => 'nullable|integer|min:1',
             'retakes' => 'nullable|integer|min:1',
-            'examination_date' => 'nullable|date|after_or_equal:now',
+            'examination_date' => 'nullable|date|after_or_equal:today',
             'passing_score' => 'required|integer|gte:1|max:100',
             'expiration_date' => 'nullable|date|after:now|after_or_equal:examination_date',
         ], [
@@ -93,13 +107,14 @@ class ExamController extends Controller
         ]);
 
         $exam = Exam::create([
-            'name' => request('name'),
-            'max_score' => request('max_score'),
-            'duration' => request('duration') ?? null,
-            'retakes' => request('retakes') ?? null, 
-            'examination_date' => request('examination_date') ?? null,
-            'passing_score' => request('passing_score'),
-            'expiration_date' => request('expiration_date') ?? null,
+            'name' => $validated['name'],
+            'academic_year_id' => $academic_year_id,
+            'max_score' => $validated['max_score'],
+            'duration' => $validated['duration'] ?? null,
+            'retakes' => $validated['retakes'] ?? null, 
+            'examination_date' => $validated['examination_date'] ?? null,
+            'passing_score' => $validated['passing_score'],
+            'expiration_date' => $validated['expiration_date'] ?? null,
         ]);
 
         $exam->courses()->attach($validated['courses']);
@@ -113,41 +128,49 @@ class ExamController extends Controller
             'type' => 'success'
         ]));
 
-        return redirect('/exams');
+        return redirect(route('exams.show', ['exam' => $exam]));
     }
 
     public function edit(Exam $exam){
         if ($exam->is_published) {
             return back();
         }
-            return view('exams/edit', ['exam'=>$exam]);
+        $exam->load('courses');
+        $courses =  $this->userService->getCoursesForUser(auth()->user()); 
+        return view('exams/edit', ['exam' => $exam, 'available_courses' => $courses]);
     }
 
     public function update(Exam $exam){
-        request()->validate([
-            'name' => 'required|string|max:255',
+        $validated = request()->validate([
+            'name' => ['required', 'string', 'max:255', Rule::unique('subjects', 'name')->ignore($exam->id)],
+            'courses' => 'required|array|min:1',
+            'courses.*' => 'exists:courses,id|required|string|distinct',
             'max_score' => 'required|integer|gte:1',
             'duration' => 'nullable|integer|min:1',
             'retakes' => 'nullable|integer|min:1',
-            'examination_date' => 'nullable|date|after_or_equal:now',
+            'examination_date' => 'nullable|date|after_or_equal:today',
             'passing_score' => 'required|integer|gte:1|max:100',
             'expiration_date' => 'nullable|date|after:now|after_or_equal:examination_date',
         ], [
+            'courses' => 'The course field is required.',
+            'courses.*' => 'Invalid Course',
             'max_score' => 'The max score field is required',
-            'examination_date.after' => 'The examination date field must be a date after now.',
+            'examination_date' => 'The examination date field must be a date after now.',
             'expiration_date.after' => 'The examination date field must be a date after now.',
             'expiration_date.after_or_equal' => 'The expiration date must be on or after the examination date.'
         ]);
 
-            $exam->update([
-                'name' => request('name'),
-                'max_score' => request('max_score'),
-                'duration' => request('duration') ?? null,
-                'retakes' => request('retakes') ?? null, 
-                'examination_date' => request('examination_date') ?? null,
-                'passing_score' => request('passing_score'),
-                'expiration_date' => request('expiration_date') ?? null,
-            ]);
+        $exam->update([
+            'name' => $validated['name'],
+            'max_score' => $validated['max_score'],
+            'duration' => $validated['duration'] ?? null,
+            'retakes' => $validated['retakes'] ?? null, 
+            'examination_date' => $validated['examination_date'] ?? null,
+            'passing_score' => $validated['passing_score'],
+            'expiration_date' => $validated['expiration_date'] ?? null,
+        ]);
+
+        $exam->courses()->sync($validated['courses']);
 
         session()->flash('toast', json_encode([
             'status' => 'Updated!',
@@ -206,15 +229,20 @@ class ExamController extends Controller
         return view('exams/exam-builder', $data);
     }
 
-    public function toggle_question(Exam $exam, Question $question){
-        if ($exam->questions->contains($question->id)) {
-            $exam->questions()->detach($question->id);
+    public function toggle_question(Exam $exam){
+        $questions_to_toggle = request()->post('toggle-questions');
+
+        foreach($questions_to_toggle as $question){
+        if ($exam->questions->contains($question)) {
+            $exam->questions()->detach($question);
         } else {
-            $exam->questions()->attach($question->id);
+            $exam->questions()->attach($question);
+        }
         }
 
+
         $exam_questions =  $this->examService->getQuestionsForExam($exam);
-            $exam_levels = $this->examService->getQuestionLevelsCountForExam($exam);
+        $exam_levels = $this->examService->getQuestionLevelsCountForExam($exam);
         $exam_topics = $this->examService->getTopicsForExam($exam);
         $exam_subjects = $this->examService->getSubjectsForExam($exam);
         $exam_question_types = $this->examService->getQuestionTypeCounts($exam);

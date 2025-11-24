@@ -16,12 +16,6 @@ class Course extends Model
         'abbreviation'
     ];
 
-    protected $appends = [
-        'subjects_count',
-        'topics_count',
-        'questions_count'
-    ];
-
     public function users(){
         return $this->belongsToMany(User::class)->withTimestamps();
     }

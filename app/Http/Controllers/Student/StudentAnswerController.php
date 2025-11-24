@@ -40,6 +40,7 @@ class StudentAnswerController extends Controller
             'back' => $student_paper->decrement('current_position'),
             'next' => $student_paper->increment('current_position'),
             'jump' => $student_paper->update(['current_position' => request('index')]),
+            'refresh' => null,
             default => dd($student_paper),
         };
 
@@ -53,7 +54,7 @@ class StudentAnswerController extends Controller
             session(['question_to_answer' => $question_to_jump_id]);
             $data['student_paper'] = $student_paper;
             $data['is_last_question'] = $is_last_question;
-
+            $data['is_expired'] = $student_paper->isExpired();
             return view( 'students/papers/show', $data);
         }
     }

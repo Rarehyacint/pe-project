@@ -286,9 +286,12 @@
 
             <div class="flex ml-auto my-2">
                 <button type="button" 
-                        class="cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-800 hover:text-white duration-300 rounded-lg p-2 font-semibold text-sm"
+                        class="flex items-center gap-1 cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-800 hover:text-white duration-300 rounded-lg p-2 font-semibold text-sm"
                         popovertarget="add-question-popover">
-                        Add Question
+                        <svg xmlns="http://www.w3.org/2000/svg" id="add-remove-icon" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clip-rule="evenodd" />
+                        </svg> 
+                        Question
                 </button>
             </div>
 
@@ -310,14 +313,18 @@
 
         <div class="flex gap-x-2 mx-8 justify-end">
             {% if exam.is_published %}
-                <button hx-patch="{{ route('exams.publish', exam) }}" 
+                <button 
+                        type="button"
+                        hx-patch="{{ route('exams.publish', {exam: exam.id}) }}" 
                         hx-headers='{"X-CSRF-TOKEN": "{{ csrf_token() }}"}' 
                         class="cursor-pointer bg-red-600 text-gray-200 hover:bg-red-500 hover:text-white duration-300 rounded-lg p-2 font-semibold text-sm">
                     Unpublish
                 </button>
             {% else %}
                 <div id="publish-form-error" class="flex gap-x-4 justify-between"></div>
-                <button hx-patch="{{ route('exams.publish', exam) }}" 
+                <button 
+                        type="button"
+                        hx-patch="{{ route('exams.publish', {exam: exam.id}) }}" 
                         hx-headers='{"X-CSRF-TOKEN": "{{ csrf_token() }}"}'
                         hx-target="#publish-form-error"
                         class="cursor-pointer bg-orange-600 text-gray-200 hover:bg-orange-500 hover:text-white duration-300 rounded-lg p-2 font-semibold text-sm">
@@ -334,7 +341,7 @@
                 <div class="flex justify-between items-center w-full h-16 p-8 bg-blue-900 border-x border-t border-gray-300 rounded-t-2xl">
                     <h1 class="text-2xl font-medium text-gray-50">Available Questions </h1>
                 </div>
-                <div class="overflow-auto max-w-full scroll-smooth rounded-b-2xl border-1 border-gray-300">
+                <div class="bg-white overflow-auto max-w-full scroll-smooth rounded-b-2xl border-1 border-gray-300">
                     {{ exam_questions_table(questions_header, rows:available_questions_rows, url:'exams', forAvailableQuestions:true, forAdding:true, openAction:false, exam_id:exam.id) }}
             
                 </div>
@@ -366,29 +373,76 @@
 
     {% endif %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Variable to store the IDs of all open details tags
-    let openDetailsState = [];
+    function bindCheckboxListeners(container = document) {
+        const addButtons = container.querySelectorAll('#add-questions-button');
+        addButtons.forEach(button => {
+            const form = button.closest('form') || container;
+            const checkboxes = form.querySelectorAll('input[name="toggle-questions[]"]');
 
-    // Capture the state of all open details before an htmx request
-    document.body.addEventListener('htmx:beforeRequest', (evt) => {
-        openDetailsState = Array.from(document.querySelectorAll('details[open]')).map(details => details.id);
-    });
+            function updateButton() {
+                const anyChecked = [...checkboxes].some(cb => cb.checked);
+                button.disabled = !anyChecked;
+            }
 
-    // Re-apply the 'open' attribute after the htmx swap has completed
-    document.body.addEventListener('htmx:afterSwap', (evt) => {
-        if (openDetailsState.length > 0) {
-            openDetailsState.forEach(id => {
-                const detailsElement = document.getElementById(id);
-                if (detailsElement) {
-                    detailsElement.setAttribute('open', '');
-                    detailsElement.classList.add('bg-blue-900');
-                }
+            checkboxes.forEach(cb => {
+                cb.removeEventListener('change', updateButton);
+                cb.addEventListener('change', updateButton);
             });
-            // Clear the state after re-applying it
-            openDetailsState = [];
-        }
+
+            updateButton();
+        });
+
+        const removeButtons = container.querySelectorAll('#remove-questions-button');
+        removeButtons.forEach(button => {
+            const form = button.closest('form') || container;
+            const checkboxes = form.querySelectorAll('input[name="toggle-questions[]"]');
+
+            function updateButton() {
+                const anyChecked = [...checkboxes].some(cb => cb.checked);
+                button.disabled = !anyChecked;
+            }
+
+            checkboxes.forEach(cb => {
+                cb.removeEventListener('change', updateButton);
+                cb.addEventListener('change', updateButton);
+            });
+
+            updateButton();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        bindCheckboxListeners();
     });
-});
+
+    document.body.addEventListener('htmx:afterSwap', (evt) => {
+        bindCheckboxListeners(evt.target);
+    });
+
+
+
+    let lastClickedButton = null;
+    let row = null;
+    document.addEventListener('DOMContentLoaded', () => {
+        let openDetailsState = [];
+
+        document.body.addEventListener('htmx:beforeRequest', (evt) => {
+            openDetailsState = Array.from(document.querySelectorAll('details[open]')).map(details => details.id);
+        });
+
+        document.body.addEventListener('htmx:afterSwap', (evt) => {
+            if (openDetailsState.length > 0) {
+                openDetailsState.forEach(id => {
+                    const detailsElement = document.getElementById(id);
+                    if (detailsElement) {
+                        detailsElement.setAttribute('open', '');
+                        detailsElement.classList.add('bg-blue-900');
+                    }
+                });
+                // Clear the state after re-applying it
+                openDetailsState = [];
+            }
+        });
+    });
 </script>
 {% endblock %}

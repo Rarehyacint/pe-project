@@ -5,13 +5,15 @@
 {% from 'components/core/show-item' import show_item %}
 
 <div class="flex mx-8">
-    <button class="ml-auto p-2 text-md text-blue-900 text-sm font-medium hover:underline cursor-pointer" 
-            hx-get="/admins/load-users" 
+    <a class="ml-auto p-2 text-md text-blue-900 text-sm font-medium hover:underline cursor-pointer" 
+            href="{{ route('admin.users.show', {'user': user } ) }}" 
+            hx-get="{{ route('admin.users.show', {'user': user } ) }}" 
+            hx-push-url="true"
             hx-trigger="click" 
             hx-swap="innerHTML transition:true"
             hx-target="#access-control-content">
         Back
-    </button>
+    </a>
 </div>
 <div class="flex flex-1 flex-col mx-8">
     <form method="POST" id="create-form" hx-post="/admins/users/{{ user.id }}" hx-target="#access-control-content" class="flex flex-col gap-y-4">
@@ -178,7 +180,16 @@
                     popovertarget="delete-popover">
                         Delete
             </button>
-            <a href="{{ request.META.HTTP_REFERER }}" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-red-500 hover:border-white hover:text-white duration-300 rounded-lg p-2 font-semibold">Cancel</a>
+            <a 
+                    href="{{ route('admin.users.show', {'user': user } ) }}" 
+                    hx-get="{{ route('admin.users.show', {'user': user } ) }}" 
+                    hx-push-url="true"
+                    hx-trigger="click" 
+                    hx-swap="innerHTML transition:true"
+                    hx-target="#access-control-content"
+                class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-red-500 hover:border-white hover:text-white duration-300 rounded-lg p-2 font-semibold">
+                Cancel
+            </a>
         </div>
     </form>
 </div>
@@ -205,7 +216,7 @@
     </button>
   </div>
 
-<form method="POST" hx-post="/admins/users/{{ user.id }}" class="hidden" id="delete-form" hx-target="#access-control-content">
+<form method="POST" hx-post="/admins/users/{{ user.id }}" class="hidden" id="delete-form" hx-target="body">
     {{ csrf_field() }}
     {{ method_field('DELETE') }}
 </form>

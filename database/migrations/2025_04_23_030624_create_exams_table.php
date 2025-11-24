@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
@@ -15,6 +16,7 @@ return new class extends Migration
     {
         Schema::create('exams', function (Blueprint $table) {
             $table->id();
+            $table->foreignIdFor(AcademicYear::class, 'academic_year_id')->constrained();
             $table->string('name');
             $table->integer('max_score');
             $table->integer('duration')->nullable();
@@ -36,6 +38,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('exams', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
         Schema::dropIfExists('exams');
     }
 };

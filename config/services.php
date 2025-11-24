@@ -15,7 +15,7 @@ return [
     */
 
     'postmark' => [
-        'token' => env('POSTMARK_TOKEN'),
+        'token' => env('POSTMARK_TOKEN', null),
     ],
 
     'ses' => [
@@ -25,14 +25,22 @@ return [
     ],
 
     'resend' => [
-        'key' => env('RESEND_KEY'),
+        'key' => env('RESEND_KEY', null),
     ],
 
     'slack' => [
         'notifications' => [
-            'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
-            'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
+            'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN', null),
+            'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL', null),
         ],
+    ],
+
+    'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect_uri'  => env('GOOGLE_REDIRECT_URI'),
+        'access_token'  => env('GOOGLE_ACCESS_TOKEN'),
+        'refresh_token' => env('GOOGLE_REFRESH_TOKEN'),
     ],
 
 ];

@@ -4,107 +4,195 @@
 
 {% extends 'components/core/faculty-layout' %}
 
-{% set values = [
-    'Data Types',
-    'Expressions',
-    'Functions',
-    'Object Oriented Programming'
-    ] %}
-
 {% block content %}
 
 {{ breadcrumb() }}
 
 <div class="flex flex-col mx-4 pl-4 pb-8">
-    <h1 class="font-bold text-4xl">Create Subject</h1>
+    <h1 class="font-bold text-4xl">Create Reviewer</h1>
 </div>
 
 <div class="flex flex-1 flex-col mx-64">
-    <form action="/reviewers" method="POST" class="flex flex-col gap-y-4">
+    <form action="/reviewers" method="POST" enctype="multipart/form-data" class="flex flex-col gap-y-4">
         {{ csrf_field() }}
         <div class="flex max-w-full rounded-xl bg-white px-2 shadow-sm ring-1 ring-gray-950/5">
             <div class="flex flex-col p-4 flex-1">
                 {{ show_header('Details') }}
-                <div class="flex gap-x-32 justify-between w-full">
-                    <div class="flex flex-col gap-y-4 w-full">
+                <div class="flex flex-col gap-y-4 w-full">
+                    {{ forms.form_field(
+                        label:forms.label(
+                            id:'subject_id', 
+                            content:'Subject', 
+                            attributes:{
+                                'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900  after:text-red-500 after:content-[\'\*\']'}
+                        ),
+                        input:forms.select(
+                            name:'subject_id',
+                            options: (subjects is defined and subjects is not empty) ? { '': 'Select subject' } : { '': 'No subjects' },
+                            attributes:{
+                                'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:outline-indigo-600 sm:text-sm/6',
+                                'required':true,
+                                'id':'subjectSelect'
+                            }
+                        ),
+                        isColumn:true 
+                    )}}
+
+                    {{ forms.form_field(
+                        label:forms.label(
+                            id:'topic_id', 
+                            content:'Topic', 
+                            attributes:{
+                                'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'\*\']'}
+                        ),
+                        input:forms.select(
+                            name:'topic_id',
+                            options: { '': 'Select topic' },
+                            attributes:{
+                                'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:outline-indigo-600 sm:text-sm/6',
+                                'required':true,
+                                'id':'topicSelect'
+                            }
+                        ),
+                        isColumn:true 
+                    )}}
+                    
+                    {# File(s) - PDF only with file preview #}
+                    <div class="flex flex-col gap-y-2">
                         {{ forms.form_field(
                             label:forms.label(
-                                id:'name', 
-                                content:'Name', 
+                                id:'reviewerFile', 
+                                content:'File(s) - PDF Only', 
                                 attributes:{
-                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900  after:text-red-500 after:content-[\'\*\']'}
-                            ),
-                            input:forms.text(
-                                name:'name', 
-                                attributes:{
-                                    'class':'block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
-                                    'required':true}
-                            ),
-                            isColumn:true 
-                        )}}
-                        {{ forms.form_field(
-                            label:forms.label(
-                                id:'topic', 
-                                content:'Topic', 
-                                attributes:{
-                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'\*\']'}
-                                    ),
-                            input:forms.search(
-                                name:'topic', 
-                                values:values, 
-                                attributes:{
-                                    'class':'flex-1 cursor-pointer block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6',
-                                    'placeholder':'Select a Topic',
-                                    'required':true}
-                            ),
-                            isColumn:true 
-                        )}}
-                        {{ forms.form_field(
-                            label:forms.label(
-                                id:'author', 
-                                content:'Author', 
-                                attributes:{
-                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900'}
-                            ),
-                            input:forms.text(
-                                name:'author', 
-                                attributes:{
-                                    'class':'block w-full cursor-not-allowed rounded-md bg-gray-100 px-3 py-1.5 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 sm:text-sm/6',
-                                    'placeholder':'Author Name is automatic/disabled',
-                                    'disabled':true}
-                            ),
-                            isColumn:true 
-                        )}}
-                        {{ forms.form_field(
-                            label:forms.label(
-                                id:'file', 
-                                content:'File', 
-                                attributes:{
-                                    'class':'text-base text-slate-900 font-medium mb-3 block'}
+                                    'class':'whitespace-nowrap text-sm/6 font-medium text-gray-900 after:text-red-500 after:content-[\'*\']'}
                             ),
                             input:forms.file(
-                                name:'file', 
-                                file:'file',
+                                name:'reviewerFile[]',
+                                file:'reviewerFile',
                                 attributes:{
-                                    'class':'w-full text-slate-500 font-medium text-sm bg-white outline-1 -outline-offset-1 outline-gray-300 file:cursor-pointer cursor-pointer 
-                                        file:border-0 file:py-3 file:px-4 file:mr-4 file:bg-gray-100 hover:file:bg-gray-200 file:text-slate-500 rounded',
-                                    'placeholder':'File path'
-                                }
+                                    'multiple':true,
+                                    'accept':'application/pdf',
+                                    'class':'w-full text-sm text-slate-500 bg-white rounded-md outline-1 -outline-offset-1 outline-gray-300 
+                                        file:cursor-pointer file:border-0 file:py-2 file:px-4 file:mr-4 
+                                        file:rounded-md file:bg-gray-100 hover:file:bg-gray-200 file:text-slate-600',
+                                    'required':true,
+                                    'onchange':'displayFileNames(this)'}
                             ),
-                            isColumn:true 
+                            isColumn:true
                         )}}
                         
+                        {# File preview area #}
+                        <div id="fileList" class="hidden mt-2 p-3 bg-gray-50 rounded-md border border-gray-200">
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Selected files:</p>
+                            <ul id="fileNames" class="text-sm text-gray-600 space-y-1"></ul>
+                        </div>
                     </div>
                 </div>
-            </div>  
+            </div>
         </div>
 
         <div class="flex gap-x-2">
-            <button type="submit" class="cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm">Add Reviewer</button>
-            <button type="submit" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-gray-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm">Add Reviewer & add another</button>
-            <a href="/subjects" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-red-500 hover:border-white hover:text-white duration-300 rounded-lg p-2 font-semibold">Cancel</a>
-
+            <button type="submit" class="cursor-pointer bg-blue-900 text-gray-200 hover:bg-blue-600 hover:text-white duration-300 rounded-lg px-4 py-2 font-semibold text-sm">
+                Add Reviewer
+            </button>
+            <button type="submit" name="add_another" value="1" class="cursor-pointer bg-white border border-gray-400 text-gray-900 hover:bg-gray-600 hover:text-white duration-300 rounded-lg px-4 py-2 font-semibold text-sm">
+                Add Reviewer & add another
+            </button>
+            <a href="/reviewers" class="cursor-pointer bg-white border border-gray-400 text-gray-900 hover:bg-red-500 hover:text-white duration-300 rounded-lg px-4 py-2 font-semibold text-sm">
+                Cancel
+            </a>
         </div>
     </form>
 </div>
+
+<script>
+// Populate subjects and topics for dependent dropdowns
+document.addEventListener('DOMContentLoaded', function () {
+    const subjects = {{ subjects is defined ? subjects|raw : '[]' }};
+    const subjectSelect = document.getElementById('subjectSelect');
+    const topicSelect = document.getElementById('topicSelect');
+
+    // Helper to clear and add an option
+    function setOptions(selectEl, options) {
+        selectEl.innerHTML = '';
+        options.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.text = opt.label;
+            selectEl.appendChild(option);
+        });
+    }
+
+    // Build subject options
+    const subjectOptions = [{ value: '', label: 'Select subject' }];
+    if (Array.isArray(subjects) && subjects.length > 0) {
+        subjects.forEach(s => {
+            // topics will be an array of objects {id, name} if present
+            subjectOptions.push({ value: s.id, label: s.name });
+        });
+    } else if (subjects && typeof subjects === 'object' && subjects.length === undefined) {
+        // If subjects came through as a Collection-like object from Twig, try to iterate
+        try {
+            for (const s of subjects) {
+                subjectOptions.push({ value: s.id, label: s.name });
+            }
+        } catch (e) {
+            // fallback - no subjects
+        }
+    }
+
+    setOptions(subjectSelect, subjectOptions);
+
+    // When a subject is selected, populate topics
+    subjectSelect.addEventListener('change', function () {
+        const selectedId = this.value;
+        // find the subject object
+        let subjectObj = null;
+        if (Array.isArray(subjects)) {
+            subjectObj = subjects.find(s => String(s.id) === String(selectedId));
+        } else if (subjects) {
+            try { subjectObj = Array.from(subjects).find(s => String(s.id) === String(selectedId)); } catch (e) { subjectObj = null; }
+        }
+
+        const topics = (subjectObj && subjectObj.topics) ? subjectObj.topics : [];
+        const topicOptions = [{ value: '', label: 'Select topic' }];
+        topics.forEach(t => topicOptions.push({ value: t.id, label: t.name }));
+        setOptions(topicSelect, topicOptions);
+    });
+});
+
+function displayFileNames(input) {
+    const fileList = document.getElementById('fileList');
+    const fileNames = document.getElementById('fileNames');
+    
+    fileNames.innerHTML = '';
+    
+    if (input.files.length > 0) {
+        fileList.classList.remove('hidden');
+        
+        Array.from(input.files).forEach((file, index) => {
+            const li = document.createElement('li');
+            li.className = 'flex items-center gap-2';
+            li.innerHTML = `
+                <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/>
+                </svg>
+                <span>${file.name} (${formatFileSize(file.size)})</span>
+            `;
+            fileNames.appendChild(li);
+        });
+    } else {
+        fileList.classList.add('hidden');
+    }
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+</script>
+
 {% endblock %}

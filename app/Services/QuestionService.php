@@ -64,13 +64,15 @@ class QuestionService
                                     'html_input' => 'strip',
                                 ]);
                 $instruction_raw = $question_type->instruction;
+                $is_syntax_code_only = $question_type->is_syntax_code_only;
+                $enable_compilation = $question_type->enable_compilation;
                 $syntax_points = $question_type->syntax_points;
                 $runtime_points = $question_type->runtime_points;
                 $test_case_points = $question_type->test_case_points;
                 $syntax_points_deduction_per_error = $question_type->syntax_points_deduction_per_error;
                 $runtime_points_deduction_per_error = $question_type->runtime_points_deduction_per_error;
                 $test_case_points_deduction_per_error = $question_type->test_case_points_deduction_per_error;
-
+                            
                 $languages = $question_type->codingQuestionLanguages()->pluck('language');
                 $coding_languages = $question_type->codingQuestionLanguages;            
                 $language_codes = $coding_languages->mapWithKeys(function ($item) {
@@ -85,6 +87,8 @@ class QuestionService
 
                 $data = [
                     'instruction' => $instruction,
+                    'is_syntax_code_only' => $is_syntax_code_only,
+                    'enable_compilation' => $enable_compilation,
                     'syntax_points' => $syntax_points,
                     'runtime_points' => $runtime_points,
                     'test_case_points' => $test_case_points,
@@ -111,6 +115,7 @@ class QuestionService
                     $response = Http::timeout(30)->post('http://java-api:8090/execute', [
                         'code' => $code,
                         'testUnit' => $test,
+                        'syntax_coding_question_only' => $code_settings['syntax_coding_question_only'],
                         'request_action' => $code_settings['action'],
                         'syntax_points' => $code_settings['syntax_points'],
                         'runtime_points' => $code_settings['runtime_points'],

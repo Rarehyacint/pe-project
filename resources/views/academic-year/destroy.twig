@@ -1,0 +1,30 @@
+{% from 'components/core/breadcrumbs' import breadcrumb %}
+{% from 'components/core/show-header' import show_header %}
+{% import 'components/core/forms' as forms %}
+
+
+<form id="academic-year-form" hx-delete="{{ route('admin.academic-year.destroy', { academic_year:id }) }}" class="flex flex-col gap-y-2 p-4 mb-2">
+    {{ csrf_field() }}
+    <div class="flex max-w-full p-4 rounded-xl bg-white">
+        <div class="flex flex-col gap-y-4">
+            {{ show_header('Delete ' ~ year_label) }}
+            <div class="flex flex-1 flex-col">
+                <div class="flex flex-col gap-y-4">
+                        <div class="flex gap-x-32 justify-between w-full">
+                            <h1>Are you sure to delete this Academic Year?</h1>
+                        </div>
+                </div>
+            </div>
+        </div> 
+    </div>
+
+    <div class="flex gap-x-2 px-4">
+        <button type="submit" class="cursor-pointer bg-red-900 text-gray-200 hover:bg-red-600 hover:text-white duration-300 rounded-lg px-2 py-1 font-semibold text-sm">Destroy Academic Year</button>
+        <button type="button" popovertarget="create-academic-year-popover" class="cursor-pointer bg-white border-1 border-gray-600 text-gray-900 hover:bg-red-500 hover:border-white hover:text-white duration-300 rounded-lg p-2 font-semibold">Cancel</button>
+
+    </div>
+</form>
+
+
+
+

@@ -304,7 +304,11 @@
                     {{ show_item('Test Case Points', question_type_data.test_case_points )}}
                     {{ show_item('🔴', question_type_data.test_case_points_deduction_per_error)  }}                 
                 </div>
-                    {{ show_item('Total Points', question.total_points )}}
+                <div class="flex flex-col gap-y-1">
+                    {{ show_item('Total Points', question.total_points)}}
+                    {{ show_item('Enable Student Compilation', question_type_data.enable_compilation ? '🟢': '🔴'  )}}                
+                    {{ show_item('Syntax Code Only', question_type_data.is_syntax_code_only ? '🟢': '🔴'  )}}
+                </div>
             </div>
         </div>  
 

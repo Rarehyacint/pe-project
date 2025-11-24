@@ -32,16 +32,17 @@
                     <p class="text-xs font-bold font-mono text-gray-900">Syntax Points :</p>
                     <span class="text-xs font-semibold font-mono text-gray-900">{{ data.api_data.points[0].syntax }}</span>
                 </div>
+                    {% if data.post_data.syntax_only_checkbox is null %}
+                        <div class="flex items-center gap-x-4 pr-auto ">
+                            <p class="text-xs font-bold font-mono text-gray-900">Runtime Points :</p>
+                            <span class="text-xs font-semibold font-mono text-gray-900">{{ data.api_data.points[0].runtime }}</span>
+                        </div>
 
-                <div class="flex items-center gap-x-4 pr-auto ">
-                    <p class="text-xs font-bold font-mono text-gray-900">Runtime Points :</p>
-                    <span class="text-xs font-semibold font-mono text-gray-900">{{ data.api_data.points[0].runtime }}</span>
-                </div>
-
-                <div class="flex items-center gap-x-4 pr-auto ">
-                    <p class="text-xs font-bold font-mono text-gray-900">Test Case Points :</p>
-                    <span class="text-xs font-semibold font-mono text-gray-900">{{ data.api_data.points[0].testcase }}</span>
-                </div>
+                        <div class="flex items-center gap-x-4 pr-auto ">
+                            <p class="text-xs font-bold font-mono text-gray-900">Test Case Points :</p>
+                            <span class="text-xs font-semibold font-mono text-gray-900">{{ data.api_data.points[0].testcase }}</span>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
             <div class="flex flex-col overflow-x-auto">
@@ -54,8 +55,13 @@
                         {{ data.api_data.error ? 'API Error' : data.api_data.failures ? 'Compilation Error' : data.api_data.success == false ? 'Runtime/Test Case Error' : 'All Tests Passed, Solution is Validated' }}
                     </p>
                 {% elseif data.post_data.action == 'check' %}
+                    {% if data.post_data.syntax_only_checkbox is not null %}
+                        {% set success_message = 'Compilation Successful (Syntax Question Only)' %}
+                    {% else %}
+                        {% set success_message = 'All Tests Passed, Points are sent' %}
+                    {% endif %}
                     <p class="sticky top-0 left-0 font-bold text-lg">
-                        {{ data.api_data.error ? 'API Error' : data.api_data.failures ? 'Compilation Error' : data.api_data.success == false ? 'Runtime/Test Case Error' : 'All Tests Passed, Points are sent' }}
+                        {{ data.api_data.error ? 'API Error' : data.api_data.failures ? 'Compilation Error' : data.api_data.success == false ? 'Runtime/Test Case Error' : success_message  }}
                     </p>
                 {% endif %}
 

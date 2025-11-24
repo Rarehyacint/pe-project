@@ -13,6 +13,7 @@ class Exam extends Model
 
     protected $fillable = [
         'name',
+        'academic_year_id',
         'course_id',
         'access_code',
         'max_score',
@@ -28,10 +29,20 @@ class Exam extends Model
         'examination_date' => 'datetime',
         'expiration_date' => 'datetime'
     ];
+
+    public function academicYear(){
+        return $this->belongsTo(AcademicYear::class);
+    }
+
     public function courses()
     {
         return $this->belongsToMany(Course::class);
     }
+
+    public function reports() {
+        return $this->hasMany(Report::class);
+    }
+    
 
     public function accessCodes() {
         return $this->hasMany(ExamAccessCode::class);
@@ -51,6 +62,22 @@ class Exam extends Model
                     ->withPivot('access_code')
                     ->withTimestamps();
     }
+
+    public function takers()
+    {
+        return $this->hasManyThrough(
+            \App\Models\User::class,         
+            \App\Models\StudentPaper::class, 
+            'exam_id',                       
+            'id',                           
+            'id',                            
+            'user_id'                        
+        )
+        ->where('student_papers.status', 'completed') 
+        ->distinct()->get();
+    }
+
+
 
     public function createdBy(){
         return $this->belongsTo(User::class, 'created_by');

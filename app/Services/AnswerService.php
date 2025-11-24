@@ -176,7 +176,6 @@ class AnswerService
         ];
         
         Redis::hmset($key, $data);
-        Redis::expire($key, 3600);
 
         return ['total_points' => $this->total_points, 'is_correct' => $this->is_correct];
     }
@@ -217,7 +216,12 @@ class AnswerService
         $oldHash = Redis::get($key);
 
         if (!$oldHash || $hash !== $oldHash) {
-            Redis::setex($key, 3600, $hash);
+            if ($student_answer['is_answered']){
+                $student_answer->update(['last_answered_at' => now()]);
+            };
+
+            Redis::setex($key, 43200, $hash);
+            
             return true; 
         }
         return false;

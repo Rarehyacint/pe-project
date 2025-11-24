@@ -29,7 +29,9 @@ class ExamController extends Controller
         $this->examService = $examService;
         $this->examTakingService = $examTakingService;
     }
-
+    public function index(){
+        return redirect()->route('students.index');
+    }
     public function show(Exam $exam){
         return view( 'students/exams/show', ['exam'=> $exam]);
     }

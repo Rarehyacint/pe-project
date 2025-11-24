@@ -81,13 +81,13 @@
                     </div>
                     <div class="flex flex-col mr-16 gap-y-4">
                         {% if exam.questions.sum('total_points') == exam.max_score %}
-                            {{ show_item('Is Currently', 'Can be Published', value_attributes:'text-green-600')}}
+                            {{ show_item('Is Currently', 'Can be Published', value_attributes:'text-green-600 py-0.5 px-2 rounded-full bg-green-100')}}
                         {% elseif exam.questions.sum('total_points') > exam.max_score %}
-                            {{ show_item('Is Currently', 'Current Points exceeds Maximum Score', value_attributes:'text-orange-600')}}
+                            {{ show_item('Is Currently', 'Current Points exceeds Maximum Score', value_attributes:'text-orange-600 py-0.5 px-2 rounded-full bg-orange-100')}}
                         {% else %}
-                            {{ show_item('Is Currently', 'Current Points is not equal to Maximum Score', value_attributes:'text-red-600')}}
+                            {{ show_item('Is Currently', 'Current Points is not equal to Maximum Score', value_attributes:'text-red-600 py-0.5 px-2 rounded-full bg-red-100')}}
                         {% endif %}                    
-                        {{ show_item('Publish Status', exam.is_published ? 'Published' : 'Unpublished', value_attributes: exam.is_published ? 'text-green-600' : 'text-red-600')}}
+                        {{ show_item('Publish Status', exam.is_published ? 'Published' : 'Unpublished', value_attributes: exam.is_published ? 'text-green-600  py-0.5 px-2 rounded-full bg-green-100' : 'text-red-600  py-0.5 px-2 rounded-full bg-red-100')}}
                         {{ show_item('Examination Date', exam.examination_date != null ? exam.examination_date|date('h:i A d M Y') : "No Examination Date") }}
                         {{ show_item('Expiration Date', exam.expiration_date != null ? exam.expiration_date|date('h:i A d M Y', false) :  "No Expiration Date") }}
                     </div>
